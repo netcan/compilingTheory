@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <stdio.h>
+#include <ctype.h>
+#include <cstdio>
 using namespace std;
 
 struct Trie {
@@ -86,7 +87,7 @@ template<class T, size_t n> // 数组末尾元素指针
 
 enum Type {
 	ERROR = 0,
-	KEY = 1,
+	KEY,
 	DELIMITER,
 	ARITHMETICOPTR,
 	RELATIONOPTR,
@@ -105,8 +106,15 @@ struct Symbol {
 
 class Lexical { // 词法分析
 	private:
-		Key keys;
-		vector<pair<string, Type> > optrs;
+		Key keys; // 关键字
+		vector<pair<string, Type> > optrs; // 运算符
+		vector<pair<string, Type> > indetifiers; // 标识符
+		vector<pair<string, Type> > constants; // 常量
+		unsigned int row, column;
+		string in; // 输入程序
+		static const char* typeStr[];
+
+		string cut(int i, int j); // 截取in的字符串[i, j)
 	public:
 		Lexical() {
 			const char * ks[] = { // 关键字表
@@ -125,6 +133,8 @@ class Lexical { // 词法分析
 			optrs.push_back(make_pair(")", DELIMITER));
 			optrs.push_back(make_pair("[", DELIMITER));
 			optrs.push_back(make_pair("]", DELIMITER));
+			optrs.push_back(make_pair("{", DELIMITER));
+			optrs.push_back(make_pair("}", DELIMITER));
 
 			// 算术运算符
 			optrs.push_back(make_pair("+", ARITHMETICOPTR));
@@ -143,14 +153,49 @@ class Lexical { // 词法分析
 			optrs.push_back(make_pair("==", RELATIONOPTR));
 			optrs.push_back(make_pair("!=", RELATIONOPTR));
 
+			row = column = 0;
 		}
 		bool isKey(const string &str); // 是否为关键字
+		int getKeyPointer(const string &str);
 		bool isOptr(const string &str); // 是否为运算符
+		bool isId(const string &str); // 是否为标识符
+		int getIDPointer(const string &str);
+		bool isNum(const string &str); // 是否数值
+		bool getIn();
+		void analysis();
 };
 
+const char *Lexical::typeStr[] = {
+	"ERROR",
+	"KEY",
+	"DELIMITER",
+	"ARITHMETICOPTR",
+	"RELATIONOPTR",
+	"NUMBER",
+	"ID"
+};
+
+string Lexical::cut(int i, int j) {
+	return string(in.begin() + i, in.begin() + j);
+}
+
 bool Lexical::isKey(const string &str) {
-	if(this->keys.find(str) != -1) return true;
+	if(keys.find(str) != -1) return true;
 	else return false;
+}
+
+int Lexical::getIDPointer(const string &str) {
+	vector<pair<string, Type> >::iterator it = find(indetifiers.begin(), indetifiers.end(), make_pair(str, ID));
+	if(it != indetifiers.end()) // 找到了
+		return it - indetifiers.begin() + 1;
+	else {
+		indetifiers.push_back(make_pair(str, ID));
+		return indetifiers.size();
+	}
+}
+
+int Lexical::getKeyPointer(const string &str) {
+	return keys.find(str);
 }
 
 bool Lexical::isOptr(const string &str) {
@@ -159,13 +204,54 @@ bool Lexical::isOptr(const string &str) {
 	return false;
 }
 
+bool Lexical::isId(const string &str) {
+	if(!isalpha(str.c_str()[0]) && str.c_str()[0] != '_')
+		return false;
+	for(auto c: str)
+		if(!isalnum(c) && c != '_') return false;
+	return true;
+}
+bool Lexical::isNum(const string &str) {
+	for(auto c:str)
+		if(!isdigit(c)) return false;
+	return true;
+}
+
+
+bool Lexical::getIn() {
+	++row;
+	return getline(cin, in);
+}
+
+void Lexical::analysis() {
+	unsigned int j = 0;
+	for(column = 0; column < in.length(); ++column) {
+		char c = in.c_str()[column];
+		if(isalpha(c)) {
+			for(j = column+1; j < in.length() && (isalnum(in[j]) || in[j] == '_'); ++j); // 匹配关键字或者标识符自动机
+			string s = cut(column, j);
+			if(isKey(s))
+				printf("%s\t(%d, %d)\t%s\tpos(%d, %d)\n", s.c_str(), KEY, getKeyPointer(s), typeStr[KEY], row, column+1);
+			else if(isId(s))
+				printf("%s\t(%d, %d)\t%s\tpos(%d, %d)\n", s.c_str(), ID, getIDPointer(s), typeStr[ID], row, column+1);
+			else
+				printf("%s\t%s\t%s\tpos(%d, %d)\n", s.c_str(), typeStr[ERROR], typeStr[ERROR], row, column+1);
+			column = j-1;
+		}
+
+	}
+}
+
+
 int main() {
 	Lexical lex;
-	string str;
-	while(1) {
-		cin >> str;
-		printf("%s: key(%d) optr(%d)\n",
-				str.c_str(), lex.isKey(str), lex.isOptr(str));
+	// string s;
+	// while(cin >> s) {
+		// printf("%s: Key(%d) Optr(%d) Id(%d)\n", s.c_str(), lex.isKey(s), lex.isOptr(s), lex.isId(s));
+	// }
+
+	while(lex.getIn()) {
+		lex.analysis();
 	}
 	return 0;
 }
