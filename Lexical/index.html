@@ -89,7 +89,11 @@
 
 			$('textarea').on('change keyup paste', update);
 
-			$('textarea').val('int a = 2, b = 3;\nint c=(a+b)/2;');
+			$('textarea').val(
+					"int a = 2, b = 3;\n" +
+					'"this isn\'t a string\n'+
+					'printf("c=%d\\n", (a+b)/2);'
+					);
 			update();
 		</script>
 	</body>
