@@ -7,8 +7,9 @@ $descriptorspec = array(
    1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
 );
 
-$process = proc_open('./lexical', $descriptorspec, $pipes);
+$process = proc_open('lexical', $descriptorspec, $pipes);
 if(is_resource($process)) {
+
 	fwrite($pipes[0], $data);
 	fclose($pipes[0]);
 
