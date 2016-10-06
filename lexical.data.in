@@ -1,0 +1,9 @@
+void fun() {
+	int a = 20;
+	int b=30;
+	int n = a*b;
+	for(int i=0; i<n; ++i) {
+		if(i%30 == 0) break;
+		else continue;
+	}
+}
