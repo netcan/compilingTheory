@@ -12,11 +12,21 @@
 			<h1>Lexical analyer by netcan</h1>
 			<div class="row">
 				<div class="col-md-6">
-					<div class="form-group">
-						<label for="indata">输入文本</label>
-						<textarea class="form-control" id="indata" name="indata" rows=10 cols=100></textarea>
+					<div clas="row">
+						<div class="form-group">
+							<label for="indata">输入文本</label>
+							<textarea class="form-control" id="indata" name="indata" rows=10 cols=100></textarea>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								记号块
+							</div>
+							<div class="panel-body" id="token">
+							</div>
+						</div>
 					</div>
 				</div>
+
 				<div class="col-md-6">
 					<div class="panel panel-info">
 						<div class="panel-heading">Lexical analyer output</div>
@@ -45,6 +55,17 @@
 
 		<script>
 			function update() {
+				var color = [
+					'btn-danger', 
+					'btn-primary',
+					'btn-info',
+					'btn-info',
+					'btn-info',
+					'btn-warning',
+					'btn-success',
+					'btn-warning',
+					'btn-warning',
+				];
 				$.ajax({
 					url: "lexical.php",
 					dataType: "json",
@@ -52,36 +73,58 @@
 					data: {indata: $('#indata').val()},
 					success: function(data, status, jqxhr) {
 						var first = 0;
-						if(data.length == 0)
+						var lastrow = 0;
+						if(data.length == 0) {
 							$('#out').html('');
+							$('#token').html('');
+						}
 						data.forEach(function(entry){
 							if(first == 0) {
+								$('#token').html('<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+								$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+
 								if(entry["type"] == "ERROR") {
 									$('#out').html("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
 								}
-								else
+								else {
+									$('#token').html('<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+
 									$('#out').html("<tr><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
+								}
 							}
 							else {
 								if(entry["type"] == "ERROR") {
+									if(lastrow != entry['pos'][0])
+										$('#token').append('<br>' + '<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+
+									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+
 									$('#out').append("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
 								}
-								else
+								else {
+									if(lastrow != entry['pos'][0])
+										$('#token').append('<br>' + '<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+
+									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+
 									$('#out').append("<tr><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
+								}
 							}
 							++first;
+							lastrow = entry['pos'][0];
 						});
 					}
 				});
