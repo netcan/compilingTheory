@@ -88,7 +88,7 @@ Lexical::Lexical() {
 	optrs.push_back(make_pair("<", RELATIONOPTR));
 	optrs.push_back(make_pair("<=", RELATIONOPTR));
 	optrs.push_back(make_pair("==", RELATIONOPTR));
-	optrs.push_back(make_pair("!=", RELATIONOPTR));
+	optrs.push_back(make_pair("<>", RELATIONOPTR));
 	optrs.push_back(make_pair("=", RELATIONOPTR));
 
 	row = column = 0;
