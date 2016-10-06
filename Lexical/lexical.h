@@ -49,7 +49,9 @@ enum Type {
 	ARITHMETICOPTR,
 	RELATIONOPTR,
 	NUMBER,
-	ID
+	ID,
+	CHAR,
+	STRING
 };
 
 struct Symbol {
@@ -67,6 +69,8 @@ class Lexical { // 词法分析
 		vector<pair<string, Type> > optrs; // 运算符
 		vector<pair<string, Type> > indetifiers; // 标识符
 		vector<pair<string, Type> > constants; // 常量
+		vector<pair<string, Type> > strings; // 字符串
+		vector<pair<char, Type> > chars; // 字符
 		unsigned int row, column;
 		string in; // 输入程序
 		static const char* typeStr[];
@@ -83,10 +87,25 @@ class Lexical { // 词法分析
 		int getIDPointer(const string &str);
 		bool isNum(const string &str); // 是否数值
 		int getNumPointer(const string &str);
+		bool isString(const string &str); // 是否字符串
+		int getStringPointer(const string &str);
+		bool isChar(const string &str); // 是否字符
+		int getCharPointer(const string &str);
 		bool getIn();
 		void analysis();
 		void run();
 };
 
+const char *Lexical::typeStr[] = {
+	"ERROR",
+	"KEY",
+	"DELIMITER",
+	"ARITHMETICOPTR",
+	"RELATIONOPTR",
+	"NUMBER",
+	"IDENTIFIER",
+	"CHAR",
+	"STRING"
+};
 
 #endif

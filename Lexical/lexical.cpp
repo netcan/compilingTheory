@@ -94,15 +94,6 @@ Lexical::Lexical() {
 	row = column = 0;
 }
 
-const char *Lexical::typeStr[] = {
-	"ERROR",
-	"KEY",
-	"DELIMITER",
-	"ARITHMETICOPTR",
-	"RELATIONOPTR",
-	"NUMBER",
-	"ID"
-};
 
 string Lexical::cut(int i, int j) {
 	return string(in.begin() + i, in.begin() + j);
@@ -172,6 +163,37 @@ int Lexical::getNumPointer(const string &str) {
 	}
 }
 
+bool Lexical::isString(const string &str) { // 是否字符串
+	return true;
+}
+
+int Lexical::getStringPointer(const string &str) {
+	vector<pair<string, Type> >::iterator it = find(strings.begin(), strings.end(), make_pair(str, STRING));
+	if(it != strings.end()) // 找到了
+		return it - strings.begin() + 1;
+	else {
+		strings.push_back(make_pair(str, STRING));
+		return strings.size();
+	}
+}
+
+bool Lexical::isChar(const string &chr) {
+	if(chr.length() == 1 || (chr[0] == '\\' && chr.length() == 2))
+		return true;
+	else
+		return false;
+}
+
+int Lexical::getCharPointer(const string &chr) {
+	vector<pair<char, Type> >::iterator it = find(chars.begin(), chars.end(), make_pair(chr.c_str()[0], CHAR));
+	if(it != chars.end()) // 找到了
+		return it - chars.begin() + 1;
+	else {
+		chars.push_back(make_pair(chr.c_str()[0], CHAR));
+		return chars.size();
+	}
+};
+
 bool Lexical::getIn() {
 	++row;
 	return getline(cin, in);
@@ -218,6 +240,20 @@ void Lexical::analysis() {
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
 
 			column = j - 1;
+		}
+		else if(c == '"' || c == '\'') {
+			for(j = column+1; j < in.length() && ( (in[j]=='\\' && ++j) || in[j] != c); ++j); // 字符(串)自动机
+			string s = cut(column+1, j);
+			// printf("%s(%ld)\n", s.c_str(), s.length());
+
+			if(row != 1 || column != 0) printf(", ");
+			if(c == '"' && j < in.length())
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), STRING, getStringPointer(s), typeStr[STRING], row, column+1);
+			else if(c == '\'' && isChar(s))
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), CHAR, getCharPointer(s), typeStr[CHAR], row, column+1);
+			else
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
+			column = j;
 		}
 		else if(!isspace(c)) {
 			if(row != 1 || column != 0) printf(", ");
