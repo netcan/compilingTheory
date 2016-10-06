@@ -1,4 +1,4 @@
-CXX=clang++
+CXX=g++
 CFLAGS=-O3 --std=c++11
 SOURCE = lexical.cpp
 DEPS = lexical.h
