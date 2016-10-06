@@ -189,9 +189,9 @@ void Lexical::analysis() {
 			if(isKey(s))
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), KEY, getKeyPointer(s), typeStr[KEY], row, column+1);
 			else if(isId(s))
-				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ID, getIDPointer(s), typeStr[KEY], row, column+1);
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ID, getIDPointer(s), typeStr[ID], row, column+1);
 			else
-				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[KEY], row, column+1);
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
 
 			column = j-1;
 		}
@@ -215,16 +215,16 @@ void Lexical::analysis() {
 			if(isOptr(s))
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), getOptrType(s), getOptrPointer(s), typeStr[getOptrType(s)], row, column+1);
 			else
-				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[KEY], row, column+1);
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
 
 			column = j - 1;
 		}
 		else if(!isspace(c)) {
 			if(row != 1 || column != 0) printf(", ");
 			if(c=='"')
-				printf("{\"word\": \"\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[KEY], row, column+1);
+				printf("{\"word\": \"\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[ERROR], row, column+1);
 			else
-				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", string(1,c).c_str(), ERROR, ERROR, typeStr[KEY], row, column+1);
+				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", string(1,c).c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
 		}
 	}
 }
