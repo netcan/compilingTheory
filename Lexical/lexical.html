@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>Lexical analyer by netcan</title>
+		<link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+		<script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+		<script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<h1>Lexical analyer by netcan</h1>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="indata">输入文本</label>
+						<textarea class="form-control" id="indata" name="indata" rows=10 cols=100></textarea>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="panel panel-info">
+						<div class="panel-heading">Lexical analyer output</div>
+						<div class="panel-body">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Word</th>
+										<th>Tuple</th>
+										<th>Type</th>
+										<th>Position</th>
+									</tr>
+								</thead>
+								<tbody id="out">
+
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- <button class="btn btn-info" id="submit">提交</button> -->
+		</div>
+
+		<script>
+			$('textarea').on('change keyup paste', function() {
+				$.ajax({
+					url: "lexical.php",
+					dataType: "json",
+					method: "POST",
+					data: {indata: $('#indata').val()},
+					success: function(data, status, jqxhr) {
+						var first = 0;
+						if(data.length == 0)
+							$('#out').html('');
+						data.forEach(function(entry){
+							if(first == 0) {
+								if(entry["type"] == "ERROR") {
+									$('#out').html("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
+											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+											);
+								}
+								else
+									$('#out').html("<tr><td>"+first+"</td><td>"+entry["word"]+
+											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+											);
+							}
+							else {
+								if(entry["type"] == "ERROR") {
+									$('#out').append("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
+											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+											);
+								}
+								else
+									$('#out').append("<tr><td>"+first+"</td><td>"+entry["word"]+
+											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+											);
+							}
+							++first;
+						});
+					}
+				});
+
+			});
+		</script>
+	</body>
+</html>
