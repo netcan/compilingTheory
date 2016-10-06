@@ -42,7 +42,7 @@
 		</div>
 
 		<script>
-			$('textarea').on('change keyup paste', function() {
+			function update() {
 				$.ajax({
 					url: "lexical.php",
 					dataType: "json",
@@ -83,8 +83,12 @@
 						});
 					}
 				});
+			}
 
-			});
+			$('textarea').on('change keyup paste', update);
+
+			$('textarea').val('int a = 2, b = 3;\nint c=(a+b)/2;');
+			update();
 		</script>
 	</body>
 </html>
