@@ -208,7 +208,7 @@ void Lexical::analysis() {
 			column = j - 1;
 		}
 		else if(isOptr(string(1, c))){
-			for(j = column+1; j < in.length() && isOptr(string(1, in[j])) && getOptrType(string(1, in[j])) == getOptrType(string(1,c)); ++j); // 运算符自动机
+			for(j = column+1; j < in.length() && isOptr(string(1, in[j])) && getOptrType(string(1, in[j])) != DELIMITER && getOptrType(string(1, in[j])) == getOptrType(string(1,c)); ++j); // 运算符自动机
 			string s = cut(column, j);
 
 			if(row != 1 || column != 0) printf(", ");
