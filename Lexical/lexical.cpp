@@ -222,7 +222,7 @@ void Lexical::analysis() {
 		else if(!isspace(c)) {
 			if(row != 1 || column != 0) printf(", ");
 			if(c=='"')
-				printf("{\"word\": \"\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[ERROR], row, column+1);
+				printf("{\"word\": \"\\\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[ERROR], row, column+1);
 			else
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", string(1,c).c_str(), ERROR, ERROR, typeStr[ERROR], row, column+1);
 		}
