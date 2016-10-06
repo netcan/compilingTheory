@@ -7,7 +7,11 @@ $descriptorspec = array(
    1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
 );
 
-$process = proc_open('lexical', $descriptorspec, $pipes);
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
+	$process = proc_open('lexical', $descriptorspec, $pipes);
+else
+	$process = proc_open('./lexical', $descriptorspec, $pipes);
+
 if(is_resource($process)) {
 
 	fwrite($pipes[0], $data);
