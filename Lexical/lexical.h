@@ -72,6 +72,7 @@ class Lexical { // 词法分析
 		vector<pair<string, Type> > strings; // 字符串
 		vector<pair<char, Type> > chars; // 字符
 		unsigned int row, column;
+		bool isFirst; // 输出的第一个结果
 		string in; // 输入程序
 		static const char* typeStr[];
 

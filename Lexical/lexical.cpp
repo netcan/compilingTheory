@@ -92,6 +92,7 @@ Lexical::Lexical() {
 	optrs.push_back(make_pair("=", RELATIONOPTR));
 
 	row = column = 0;
+	isFirst = true;
 }
 
 
@@ -207,7 +208,9 @@ void Lexical::analysis() {
 			for(j = column+1; j < in.length() && (isalnum(in[j]) || in[j] == '_'); ++j); // 匹配关键字或者标识符自动机
 			string s = cut(column, j);
 
-			if(row != 1 || column != 0) printf(", ");
+			if(!isFirst) printf(", ");
+			else isFirst = false;
+
 			if(isKey(s))
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), KEY, getKeyPointer(s), typeStr[KEY], row, column+1);
 			else if(isId(s))
@@ -221,7 +224,8 @@ void Lexical::analysis() {
 			for(j = column+1; j < in.length() && (isalnum(in[j]) || in[j] == '_'); ++j); // 匹配数字字符串自动机
 			string s = cut(column, j);
 
-			if(row != 1 || column != 0) printf(", ");
+			if(!isFirst) printf(", ");
+			else isFirst = false;
 			if(isNum(s))
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), NUMBER, getNumPointer(s), typeStr[NUMBER], row, column+1);
 			else
@@ -233,7 +237,8 @@ void Lexical::analysis() {
 			for(j = column+1; j < in.length() && isOptr(string(1, in[j])) && getOptrType(string(1, in[j])) != DELIMITER && getOptrType(string(1, in[j])) == getOptrType(string(1,c)); ++j); // 运算符自动机
 			string s = cut(column, j);
 
-			if(row != 1 || column != 0) printf(", ");
+			if(!isFirst) printf(", ");
+			else isFirst = false;
 			if(isOptr(s))
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), getOptrType(s), getOptrPointer(s), typeStr[getOptrType(s)], row, column+1);
 			else
@@ -246,7 +251,8 @@ void Lexical::analysis() {
 			string s = cut(column+1, j);
 			// printf("%s(%ld)\n", s.c_str(), s.length());
 
-			if(row != 1 || column != 0) printf(", ");
+			if(!isFirst) printf(", ");
+			else isFirst = false;
 			if(c == '"' && j < in.length())
 				printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), STRING, getStringPointer(s), typeStr[STRING], row, column+1);
 			else if(c == '\'' && isChar(s))
@@ -256,7 +262,6 @@ void Lexical::analysis() {
 			column = j;
 		}
 		else if(!isspace(c)) {
-			if(row != 1 || column != 0) printf(", ");
 			if(c=='"')
 				printf("{\"word\": \"\\\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[ERROR], row, column+1);
 			else
