@@ -18,6 +18,11 @@
 				direction: rtl;
 
 			}
+			hr {
+				visibility:hidden; 
+		   		margin-top: -7px;
+			}
+
 			/* Let's get this party started */
 			::-webkit-scrollbar {
 				width: 8px;
@@ -130,8 +135,8 @@
 						data.forEach(function(entry){
 							if(first == 0) {
 								if(entry["type"] == "ERROR") {
-									$('#token').html('<a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
-									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+									$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
+									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
 											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 											+'">' + entry['word'] + '</a>');
 
@@ -141,8 +146,8 @@
 											);
 								}
 								else {
-									$('#token').html('<a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
-									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+									$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
+									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
 											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 											+'">' + entry['word'] + '</a>');
 
@@ -155,9 +160,9 @@
 							else {
 								if(entry["type"] == "ERROR") {
 									if(lastrow != entry['pos'][0])
-										$('#token').append('<br><a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
+										$('#token').append('<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
 
-									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
 											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 											+'">' + entry['word'] + '</a>');
 									
@@ -168,9 +173,9 @@
 								}
 								else {
 									if(lastrow != entry['pos'][0])
-										$('#token').append('<br><a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
+										$('#token').append('<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
 
-									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
 											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 											+'">' + entry['word'] + '</a>');
 
