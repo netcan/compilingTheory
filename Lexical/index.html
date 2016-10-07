@@ -1,47 +1,83 @@
 <html>
 	<head>
 		<title>Lexical analyer by netcan</title>
-		<link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 		<script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
-		<script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<link href="http://cdn.bootcss.com/semantic-ui/2.2.4/semantic.min.css" rel="stylesheet">
 		<style>
-			#forkongithub a{background:#000;color:#fff;text-decoration:none;font-family:arial,sans-serif;text-align:center;font-weight:bold;padding:5px 40px;font-size:1rem;line-height:2rem;position:relative;transition:0.5s;}#forkongithub a:hover{background:#c11;color:#fff;}#forkongithub a::before,#forkongithub a::after{content:"";width:100%;display:block;position:absolute;top:1px;left:0;height:1px;background:#fff;}#forkongithub a::after{bottom:1px;top:auto;}@media screen and (min-width:800px){#forkongithub{position:fixed;display:block;top:0;right:0;width:200px;overflow:hidden;height:200px;z-index:9999;}#forkongithub a{width:200px;position:absolute;top:42px;right:-42px;transform:rotate(45deg);-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);box-shadow:4px 4px 10px rgba(0,0,0,0.8);}}
-			hr {
-				visibility:hidden; 
-				margin-top: -19px;
+			.outmaxh {
+				display: block;
+				max-height: 550px;
+				height: 550px;
+				overflow-y: auto;
+			}
+			.tokenmaxh {
+				display: inline-block;
+				max-height: 300px;
+				height: 300px;
+				overflow-y: auto;
+				direction: rtl;
+
+			}
+			/* Let's get this party started */
+			::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			/* Track */
+			::-webkit-scrollbar-track {
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+			}
+
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+				background: rgba(222,219,219,0.8);
+				-webkit-box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+			}
+			::-webkit-scrollbar-thumb:window-inactive {
+				background: rgba(255,0,0,0.4);
 			}
 		</style>
-		<span id="forkongithub">
 	</head>
 	<body>
-		<a href="https://github.com/netcan/compilingTheory" target="_blank">Fork me on GitHub</a></span>
-		<div class="container-fluid">
-			<h1>Lexical analyer by netcan</h1>
-			<div class="row">
-				<div class="col-md-6">
-					<div clas="row">
-						<div class="form-group">
-							<label for="indata">输入文本</label>
-							<textarea class="form-control" id="indata" name="indata" rows=10 cols=100></textarea>
-						</div>
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								记号块
+		<div class="ui container">
+
+			<h1 class="ui header">Lexical analyer by netcan</h1>
+
+			<div class="ui two column doubling grid">
+				<div class="column">
+					<div class="ui stacked segment">
+						<div class="ui form">
+							<div class="field">
+								<label for="indata">输入文本</label>
+								<textarea id="indata" name="indata"></textarea>
 							</div>
-							<div class="panel-body" id="token">
+						</div>
+					</div>
+					<div class="row">
+						<div class="column">
+							<div class="ui piled segment">
+								<h3 class="ui header"> 记号块 </h5>
+								<div class="tokenmaxh">
+									<div id="token" style="direction: ltr;">
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="col-md-6">
-					<div class="panel panel-info">
-						<div class="panel-heading">Lexical analyer output</div>
-						<div class="panel-body">
-							<table class="table table-hover">
+				<div class="column">
+					<div class="ui piled segment">
+						<h3 class="ui header">Lexical analyer output</h4>
+						<div class="outmaxh">
+							<table class="ui fixed compact stackable stackable selectable celled table">
 								<thead>
 									<tr>
-										<th>#</th>
+										<th class="two wide">#</th>
 										<th>Word</th>
 										<th>Tuple</th>
 										<th>Type</th>
@@ -55,23 +91,29 @@
 						</div>
 					</div>
 				</div>
+
 			</div>
 
 			<!-- <button class="btn btn-info" id="submit">提交</button> -->
+			<a href="https://github.com/netcan/compilingTheory" target="_blank">
+				<img style="position: fixed; top: 0; right: 0; border: 0; z-index: 901" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
+			</a>
 		</div>
 
+		<script src="http://cdn.bootcss.com/semantic-ui/2.2.4/semantic.min.js"></script>
 		<script>
 			function update() {
 				var color = [
-					'btn-danger', 
-					'btn-primary',
-					'btn-info',
-					'btn-info',
-					'btn-info',
-					'btn-warning',
-					'btn-success',
-					'btn-warning',
-					'btn-warning',
+					'red',
+					'blue',
+					'grey',
+					'purple',
+					'violet',
+					'pink',
+					'teal',
+					'orange',
+					'orange',
+					'brown'
 				];
 				$.ajax({
 					url: "lexical.php",
@@ -87,18 +129,22 @@
 						}
 						data.forEach(function(entry){
 							if(first == 0) {
-								$('#token').html('<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
-								$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
-
 								if(entry["type"] == "ERROR") {
-									$('#out').html("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
+									$('#token').html('<a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
+									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+											+'">' + entry['word'] + '</a>');
+
+									$('#out').html("<tr class='negative'><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
 								}
 								else {
-									$('#token').html('<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
-									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+									$('#token').html('<a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
+									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+											+'">' + entry['word'] + '</a>');
 
 									$('#out').html("<tr><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
@@ -109,20 +155,24 @@
 							else {
 								if(entry["type"] == "ERROR") {
 									if(lastrow != entry['pos'][0])
-										$('#token').append('<hr>' + '<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+										$('#token').append('<br><a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
 
-									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
-
-									$('#out').append("<tr class='danger'><td>"+first+"</td><td>"+entry["word"]+
+									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+											+'">' + entry['word'] + '</a>');
+									
+									$('#out').append("<tr class='negative'><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
 											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
 											);
 								}
 								else {
 									if(lastrow != entry['pos'][0])
-										$('#token').append('<hr>' + '<button class="btn btn-xs">#' + entry['pos'][0] + '</button> ');
+										$('#token').append('<br><a class="small ui basic circular label">#' + entry['pos'][0] + '</a>');
 
-									$('#token').append('<button class="btn btn-xs ' + color[entry['tuple'][0]] + '">' + entry['word'] + '</button> ');
+									$('#token').append('<a class="small ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+											+'">' + entry['word'] + '</a>');
 
 									$('#out').append("<tr><td>"+first+"</td><td>"+entry["word"]+
 											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
@@ -132,6 +182,7 @@
 							}
 							++first;
 							lastrow = entry['pos'][0];
+							$('#token a').popup();
 						});
 					}
 				});

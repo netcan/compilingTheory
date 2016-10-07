@@ -233,6 +233,15 @@ void Lexical::analysis() {
 
 			column = j - 1;
 		}
+		else if(c == '/' && in[column+1] == '/') { // 注释
+			for(column += 2; column < in.length() && isspace(column); ++column);
+			string s = cut(column, in.length());
+
+			if(!isFirst) printf(", ");
+			else isFirst = false;
+			printf("{\"word\": \"%s\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", s.c_str(), COMMENT, 0, typeStr[COMMENT], row, column+1);
+			column = in.length();
+		}
 		else if(isOptr(string(1, c))){
 			for(j = column+1; j < in.length() && isOptr(string(1, in[j])) && getOptrType(string(1, in[j])) != DELIMITER && getOptrType(string(1, in[j])) == getOptrType(string(1,c)); ++j); // 运算符自动机
 			string s = cut(column, j);
@@ -246,7 +255,7 @@ void Lexical::analysis() {
 
 			column = j - 1;
 		}
-		else if(c == '"' || c == '\'') {
+		else if(c == '"' || c == '\'') { // 字符串
 			for(j = column+1; j < in.length() && ( (in[j]=='\\' && ++j) || in[j] != c); ++j); // 字符(串)自动机
 			string s = cut(column+1, j);
 			// printf("%s(%ld)\n", s.c_str(), s.length());
@@ -262,6 +271,8 @@ void Lexical::analysis() {
 			column = j;
 		}
 		else if(!isspace(c)) {
+			if(!isFirst) printf(", ");
+			else isFirst = false;
 			if(c=='"')
 				printf("{\"word\": \"\\\"\", \"tuple\": [%d, %d], \"type\": \"%s\", \"pos\": [%d, %d]}\n", ERROR, ERROR, typeStr[ERROR], row, column+1);
 			else

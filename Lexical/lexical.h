@@ -51,7 +51,8 @@ enum Type {
 	NUMBER,
 	ID,
 	CHAR,
-	STRING
+	STRING,
+	COMMENT
 };
 
 struct Symbol {
@@ -106,7 +107,8 @@ const char *Lexical::typeStr[] = {
 	"NUMBER",
 	"IDENTIFIER",
 	"CHAR",
-	"STRING"
+	"STRING",
+	"COMMENT"
 };
 
 #endif
