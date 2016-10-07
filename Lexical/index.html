@@ -19,7 +19,7 @@
 
 			}
 			hr {
-				visibility:hidden; 
+				visibility:hidden;
 		   		margin-top: -7px;
 			}
 
@@ -134,56 +134,30 @@
 						}
 						data.forEach(function(entry){
 							if(first == 0) {
-								if(entry["type"] == "ERROR") {
-									$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
-									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
-											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
-											+'">' + entry['word'] + '</a>');
-
-									$('#out').html("<tr class='negative'><td>"+first+"</td><td>"+entry["word"]+
-											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
-											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
-											);
-								}
-								else {
-									$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
-									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
-											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
-											+'">' + entry['word'] + '</a>');
-
-									$('#out').html("<tr><td>"+first+"</td><td>"+entry["word"]+
-											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
-											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
-											);
-								}
+								var token = $('#token').html;
+								var out =  $('#out').html();
+							}
+							if(first == 0) {
+								$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
+								$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+										"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+										+'">' + entry['word'] + '</a>');
+								$('#out').html("<tr class='"+ (entry["type"] == "ERROR"?"negative":"") +"'><td>"+first+"</td><td>"+entry["word"]+
+										"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+										entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+										);
 							}
 							else {
-								if(entry["type"] == "ERROR") {
-									if(lastrow != entry['pos'][0])
-										$('#token').append('<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
+								if(lastrow != entry['pos'][0])
+									$('#token').append('<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
 
-									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
-											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
-											+'">' + entry['word'] + '</a>');
-									
-									$('#out').append("<tr class='negative'><td>"+first+"</td><td>"+entry["word"]+
-											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
-											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
-											);
-								}
-								else {
-									if(lastrow != entry['pos'][0])
-										$('#token').append('<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
-
-									$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
-											"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
-											+'">' + entry['word'] + '</a>');
-
-									$('#out').append("<tr><td>"+first+"</td><td>"+entry["word"]+
-											"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
-											entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
-											);
-								}
+								$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
+										"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+										+'">' + entry['word'] + '</a>');
+								$('#out').append("<tr class='"+ (entry["type"] == "ERROR"?"negative":"") +"'><td>"+first+"</td><td>"+entry["word"]+
+										"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+										entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>"
+										);
 							}
 							++first;
 							lastrow = entry['pos'][0];
