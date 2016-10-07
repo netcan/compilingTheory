@@ -134,10 +134,6 @@
 						}
 						data.forEach(function(entry){
 							if(first == 0) {
-								var token = $('#token').html;
-								var out =  $('#out').html();
-							}
-							if(first == 0) {
 								$('#token').html('<a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>');
 								$('#token').append('<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
 										"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
