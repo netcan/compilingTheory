@@ -50,12 +50,11 @@
 	</head>
 	<body>
 		<div class="ui container">
+			<h1 class="header">Lexical analyer by netcan</h1>
 
-			<h1 class="ui header">Lexical analyer by netcan</h1>
-
-			<div class="ui two column doubling grid">
+			<div class="ui two column doubling stackable grid">
 				<div class="column">
-					<div class="ui stacked segment">
+					<div class="ui segment">
 						<div class="ui form">
 							<div class="field">
 								<label for="indata">输入文本</label>
@@ -66,7 +65,9 @@
 					<div class="row">
 						<div class="column">
 							<div class="ui piled segment">
-								<h3 class="ui header"> 记号块 </h5>
+								<h3 class="ui horizontal divider header">
+									<i class="tiny code icon"></i>记号块
+								</h3>
 								<div class="tokenmaxh">
 									<div id="token" style="direction: ltr;">
 									</div>
@@ -78,7 +79,10 @@
 
 				<div class="column">
 					<div class="ui piled segment">
-						<h3 class="ui header">Lexical analyer output</h4>
+						<h3 class="ui horizontal divider header">
+							<i class="tiny hashtag icon"></i>
+							Lexical analyer output
+						</h3>
 						<div class="outmaxh">
 							<table class="ui fixed compact stackable striped selectable celled table">
 								<thead>
@@ -129,17 +133,15 @@
 					success: function(data, status, jqxhr) {
 						var first = 0;
 						var lastrow = 0;
-						if(data.length == 0) {
-							$('#out').html('');
-							$('#token').html('');
-						}
 						var token = '';
 						var out = '';
-						data.forEach(function(entry){
+						for(var i=0, len=data.length; i!=len; ++i) {
+							var entry = data[i];
 							if(lastrow != entry['pos'][0])
 								token += '<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>';
-							token +='<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-title="Token Info" data-content="'+
-								"Type: " + entry['type'] + ", Pointer: " + entry['tuple'][1] + ", Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+							token +='<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-html="'+
+								'<a class=\'ui olive top attached label\'>Token Info</a><br>' +
+								"Type: " + entry['type'] + "<br>Pointer: " + entry['tuple'][1] + "<br>Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 								+'">' + entry['word'] + '</a>';
 							out += "<tr class='"+ (entry["type"] == "ERROR"?"negative":"") +"'><td>"+first+"</td><td>"+entry["word"]+
 								"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
@@ -147,7 +149,7 @@
 
 							++first;
 							lastrow = entry['pos'][0];
-						});
+						}
 					//	console.log(token);
 					//	console.log(out);
 						$('#token').html(token);

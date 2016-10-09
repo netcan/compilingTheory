@@ -141,10 +141,10 @@ bool Lexical::isId(const string &str) {
 int Lexical::getIDPointer(const string &str) {
 	vector<pair<string, Type> >::iterator it = find(indetifiers.begin(), indetifiers.end(), make_pair(str, ID));
 	if(it != indetifiers.end()) // 找到了
-		return it - indetifiers.begin() + 1;
+		return it - indetifiers.begin();
 	else {
 		indetifiers.push_back(make_pair(str, ID));
-		return indetifiers.size();
+		return indetifiers.size() - 1;
 	}
 }
 
@@ -157,10 +157,10 @@ bool Lexical::isNum(const string &str) {
 int Lexical::getNumPointer(const string &str) {
 	vector<pair<string, Type> >::iterator it = find(constants.begin(), constants.end(), make_pair(str, NUMBER));
 	if(it != constants.end()) // 找到了
-		return it - constants.begin() + 1;
+		return it - constants.begin();
 	else {
 		constants.push_back(make_pair(str, NUMBER));
-		return constants.size();
+		return constants.size() - 1;
 	}
 }
 
@@ -171,10 +171,10 @@ bool Lexical::isString(const string &str) { // 是否字符串
 int Lexical::getStringPointer(const string &str) {
 	vector<pair<string, Type> >::iterator it = find(strings.begin(), strings.end(), make_pair(str, STRING));
 	if(it != strings.end()) // 找到了
-		return it - strings.begin() + 1;
+		return it - strings.begin();
 	else {
 		strings.push_back(make_pair(str, STRING));
-		return strings.size();
+		return strings.size() - 1;
 	}
 }
 
@@ -188,10 +188,10 @@ bool Lexical::isChar(const string &chr) {
 int Lexical::getCharPointer(const string &chr) {
 	vector<pair<char, Type> >::iterator it = find(chars.begin(), chars.end(), make_pair(chr.c_str()[0], CHAR));
 	if(it != chars.end()) // 找到了
-		return it - chars.begin() + 1;
+		return it - chars.begin();
 	else {
 		chars.push_back(make_pair(chr.c_str()[0], CHAR));
-		return chars.size();
+		return chars.size() - 1;
 	}
 };
 
