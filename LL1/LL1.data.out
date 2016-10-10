@@ -1,0 +1,29 @@
+VT: 
+(, ), *, +, -, /, @, i, 
+VN: 
+E, F, G, S, T, 
+noTerminal: E
+selections: 
+TG
+noTerminal: G
+selections: 
++TG
+-TG
+@
+noTerminal: T
+selections: 
+FS
+noTerminal: S
+selections: 
+*FS
+/FS
+@
+noTerminal: F
+selections: 
+(E)
+i
+FIRST(E)= {(,i,}
+FIRST(G)= {+,-,@,}
+FIRST(T)= {(,i,}
+FIRST(S)= {*,/,@,}
+FIRST(F)= {(,i,}
