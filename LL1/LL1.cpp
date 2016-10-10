@@ -122,14 +122,13 @@ set<char> LL1::first(const string &s) {
 			res.insert(s[0]);
 			return res;
 		}
-		else {
+		else { // 非终结符、候选式
 			if(FIRST[s[0]].size() != 0) return FIRST[s[0]];
 			else {
-				for(vector<Prod>::iterator it = G.begin(); it != G.end(); ++it) {// 寻找产生式
-					if(*it == s[0]) {
-						set<char> f = first(it->prod);
-						FIRST[s[0]].insert(f.begin(), f.end());
-					}
+				vector<Prod>::iterator it = find(G.begin(), G.end(), s[0]);
+				if(it != G.end()) {
+					set<char> f = first(it->prod);
+					FIRST[s[0]].insert(f.begin(), f.end());
 				}
 				return FIRST[s[0]];
 			}
