@@ -140,7 +140,7 @@
 							if(lastrow != entry['pos'][0])
 								token += '<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>';
 							token +='<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-html="'+
-								'<a class=\'ui olive top attached label\'>Token Info</a><br>' +
+								'<a class=\'ui '+ color[entry['tuple'][0]] +' top attached label\'>Token Info</a><br>' +
 								"Type: " + entry['type'] + "<br>Pointer: " + entry['tuple'][1] + "<br>Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
 								+'">' + entry['word'] + '</a>';
 							out += "<tr class='"+ (entry["type"] == "ERROR"?"negative":"") +"'><td>"+first+"</td><td>"+entry["word"]+
