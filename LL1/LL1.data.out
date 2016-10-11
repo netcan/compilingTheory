@@ -1,27 +1,12 @@
 VT: 
-(, ), *, +, -, /, @, i, 
+#, (, ), *, +, -, /, i, 
 VN: 
 E, F, G, S, T, 
-noTerminal: E
-selections: 
-TG
-noTerminal: G
-selections: 
-+TG
--TG
-@
-noTerminal: T
-selections: 
-FS
-noTerminal: S
-selections: 
-*FS
-/FS
-@
-noTerminal: F
-selections: 
-(E)
-i
+noTerminal: E->TG
+noTerminal: G->+TG|-TG|@
+noTerminal: T->FS
+noTerminal: S->*FS|/FS|@
+noTerminal: F->(E)|i
 FIRST(E)= {(,i,}
 FIRST(G)= {+,-,@,}
 FIRST(T)= {(,i,}
@@ -32,3 +17,30 @@ FOLLOW(G)= {#,),}
 FOLLOW(T)= {#,),+,-,}
 FOLLOW(S)= {#,),+,-,}
 FOLLOW(F)= {#,),*,+,-,/,}
+Parse Table:
+	#	(	)	*	+	-	/	i
+ E|		TG						TG
+ G|	@		@		+TG	-TG		
+ T|		FS						FS
+ S|	@		@	*FS	@	@	/FS	
+ F|		(E)						i
+i+i*i#
+step	parseStack	indataStack	production
+0	#E		i+i*i#		
+1	#GT		i+i*i#		E->TG
+2	#GSF		i+i*i#		T->FS
+3	#GSi		i+i*i#		F->i
+4	#GS		+i*i#		
+5	#G		+i*i#		S->@
+6	#GT+		+i*i#		G->+TG
+7	#GT		i*i#		
+8	#GSF		i*i#		T->FS
+9	#GSi		i*i#		F->i
+10	#GS		*i#		
+11	#GSF*		*i#		S->*FS
+12	#GSF		i#		
+13	#GSi		i#		F->i
+14	#GS		#		
+15	#G		#		S->@
+16	#		#		G->@
+Parse Success!

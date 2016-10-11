@@ -102,14 +102,23 @@ class LL1 {
 	private: vector<Prod> G; // 文法G
 		set<char> VN; // 非终结符
 		set<char> VT; // 终结符
-		map<char, set<char> > FIRST;
-		map<char, set<char> > FOLLOW;
+		map<char, set<char> > FIRST; // first集
+		map<char, set<char> > FOLLOW; // follow集
+		map<pair<char, char>, string> M; // 分析表
 		set<char> first(const string &s);
 		set<char> follow(const Prod &prod);
+		vector<char> parse; // 分析栈
+		vector<char> indata; // 输入表达式栈
+		void parseTable();
 	public:
-		bool addProd(const Prod & prod);
-		void debug();
-		void buildFF();
+		bool addProd(const Prod & prod); // 添加产生式
+		void debug(); // 输出相关结果
+		void build(); // 建立first、follow集、分析表
+		void showIndataStack(); // 输出输入串内容
+		void showParseStack(); // 输出分析栈内容
+		void loadIndata(const string &s); // 输入串入栈
+		void parser(); // LL1预测分析
+		void error(); // 错误处理
 };
 
 bool LL1::addProd(const Prod &prod) {
@@ -133,13 +142,22 @@ set<char> LL1::first(const string &s) {
 	Prod prod = Prod(s);
 	if(prod.isValid) { // 产生式
 		if(FIRST[prod.noTerminal].size() != 0) return FIRST[prod.noTerminal];
-		for(auto sel:prod.selection) {
-			set<char> f = first(sel);
-			FIRST[prod.noTerminal].insert(f.begin(), f.end());
+		for(auto sel:prod.selection) { // 候选式
+			for(unsigned int i=0; i<sel.length(); ++i) {
+				char c = sel[i];
+				set<char> f = first(string(1, c));
+				if(f.find('@') != f.end() && sel.length() - 1 != i) { // 发现@
+					f.erase(f.find('@')); // 减去@
+					FIRST[prod.noTerminal].insert(f.begin(), f.end()); // 放入first集合
+				} else {
+					FIRST[prod.noTerminal].insert(f.begin(), f.end());
+					break;
+				}
+			}
 		}
 		return FIRST[prod.noTerminal];
 	}
-	else { // 非产生式
+	else if(s.length() == 1){ // 非产生式
 		if(VT.find(s[0]) != VT.end()) { // 终结符
 			set<char> res;
 			res.insert(s[0]);
@@ -149,13 +167,27 @@ set<char> LL1::first(const string &s) {
 			if(FIRST[s[0]].size() != 0) return FIRST[s[0]];
 			else {
 				vector<Prod>::iterator it = find(G.begin(), G.end(), s[0]);
-				if(it != G.end()) {
+				if(*it == s[0]) {
 					set<char> f = first(it->prod);
 					FIRST[s[0]].insert(f.begin(), f.end());
 				}
 				return FIRST[s[0]];
 			}
 		}
+	} else {
+		set<char> ret;
+		for(unsigned int i=0; i<s.length(); ++i) {
+			char c = s[i];
+			set<char> f = first(string(1, c));
+			if(f.find('@') != f.end() && s.length() - 1 != i) { // 发现@
+				f.erase(f.find('@')); // 减去@
+				ret.insert(f.begin(), f.end()); // 放入first集合
+			} else {
+				ret.insert(f.begin(), f.end());
+				break;
+			}
+		}
+		return ret;
 	}
 }
 
@@ -198,15 +230,100 @@ set<char> LL1::follow(const Prod &prod) {
 	return FOLLOW[prod.noTerminal];
 }
 
-void LL1::buildFF() {
+void LL1::parseTable() { // X->a
+	for(auto prod: G) { // 枚举产生式
+		for(auto sel:prod.selection) { // 枚举候选式
+			set<char> folw = first(sel);
+			for(auto terminal: folw)
+				if(terminal == '@')  // 存在@，将follow(x)的每个终结符放入表中
+					for(auto term: FOLLOW[prod.noTerminal])
+						M[make_pair(prod.noTerminal, term)] = sel;
+				else
+					M[make_pair(prod.noTerminal, terminal)] = sel;
+		}
+	}
+}
+
+void LL1::build() {
 	for(auto prod: G) first(prod.prod); // 求first集
 
 	FOLLOW[G[0].noTerminal].insert('#'); // 将结束符放入开始符号中
 	for(auto prod: G) follow(prod); // 求follow集
 
+	parseTable(); // 预测分析表
+	// 求完表后，将@替换为#
+	VT.erase(VT.find('@'));
+	VT.insert('#');
+
 	return;
 }
 
+void LL1::showIndataStack() {
+	for(vector<char>::reverse_iterator it = indata.rbegin(); it != indata.rend(); ++it)
+		printf("%c", *it);
+}
+
+void LL1::showParseStack() {
+	for(vector<char>::iterator it = parse.begin(); it != parse.end(); ++it)
+		printf("%c", *it);
+}
+
+void LL1::loadIndata(const string &s) {
+	indata.push_back('#');
+	for(int i=s.length()-1; i>=0; --i)
+		indata.push_back(s[i]);
+}
+
+void LL1::error() {
+	printf("Parse Error!\n");
+}
+
+void LL1::parser() {
+	parse.push_back('#');
+	parse.push_back(G[0].noTerminal); // 文法开始符号
+	printf("step\tparseStack\tindataStack\tproduction\n");
+	unsigned int ptop, itop, step = 0;
+	string prod; // 候选式
+	while((ptop = parse.size() - 1) > 0) {
+		itop = indata.size() - 1;
+
+		printf("%d\t", step++);
+		showParseStack(); printf("\t\t");
+		showIndataStack(); printf("\t\t%s\n", prod.c_str());
+
+		// begin
+		prod = "";
+		char X = parse[ptop];
+		char curc = indata[itop];
+		parse.pop_back();
+		if(VT.find(X) != VT.end()) { // 终结符
+			if(X != curc) {
+				error();
+				break;
+			}
+			else
+				indata.pop_back();
+		} else if(X == '@')
+			continue;
+		else { // 终结符
+			prod = M[make_pair(X, curc)];
+			if(prod.size()) { // 找得到
+				if(prod != "@")
+					for(int i=prod.size() - 1; i>=0; --i)
+						parse.push_back(prod[i]);
+			}
+			else {
+				error();
+				break;
+			}
+			prod = string(1, X) + "->" + prod;
+		}
+	}
+	printf("%d\t", step++);
+	showParseStack(); printf("\t\t");
+	showIndataStack(); printf("\t\t%s\n", prod.c_str());
+	printf("Parse Success!\n");
+}
 
 void LL1::debug() {
 	printf("VT: \n");
@@ -217,12 +334,8 @@ void LL1::debug() {
 	for(auto c: VN)
 		printf("%c, ", c);
 	puts("");
-	for(auto p: G) {
-		printf("noTerminal: %c\n", p.noTerminal);
-		printf("selections: \n");
-		for(auto s: p.selection)
-			cout << s << endl;
-	}
+	for(auto p: G)
+		printf("noTerminal: %s\n", p.prod.c_str());
 	for(auto prod:G) {
 		printf("FIRST(%c)= {", prod.noTerminal);
 		for(auto c:FIRST[prod.noTerminal]) {
@@ -238,15 +351,32 @@ void LL1::debug() {
 		}
 		printf("}\n");
 	}
+	printf("Parse Table:\n");
+	for(auto c:VT) // 终结符，表头
+		printf("\t%c", c);
+	puts("");
+	for(auto prod:G) {
+		printf("%2c|", prod.noTerminal);
+		for(auto c:VT) // 终结符
+			printf("\t%s", M[make_pair(prod.noTerminal, c)].c_str());
+		puts("");
+	}
+
 }
 
 int main() {
 	LL1 ll;
 	string in;
-	while(cin >> in)
+	while(cin >> in && in != "#") // 读取文法
 		ll.addProd(Prod(in));
-	ll.buildFF();
+	ll.build();
 	ll.debug();
+
+	cin >> in; // 表达式
+	ll.loadIndata(in);
+	ll.showIndataStack();
+	puts("");
+	ll.parser();
 
 	return 0;
 }
