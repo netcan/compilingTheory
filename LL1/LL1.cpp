@@ -103,11 +103,13 @@ class LL1 {
 		set<char> VN; // 非终结符
 		set<char> VT; // 终结符
 		map<char, set<char> > FIRST;
+		map<char, set<char> > FOLLOW;
 		set<char> first(const string &s);
+		set<char> follow(const Prod &prod);
 	public:
 		bool addProd(const Prod & prod);
-		void show();
-		void buildFirst();
+		void debug();
+		void buildFF();
 };
 
 bool LL1::addProd(const Prod &prod) {
@@ -130,6 +132,7 @@ bool LL1::addProd(const Prod &prod) {
 set<char> LL1::first(const string &s) {
 	Prod prod = Prod(s);
 	if(prod.isValid) { // 产生式
+		if(FIRST[prod.noTerminal].size() != 0) return FIRST[prod.noTerminal];
 		for(auto sel:prod.selection) {
 			set<char> f = first(sel);
 			FIRST[prod.noTerminal].insert(f.begin(), f.end());
@@ -156,12 +159,56 @@ set<char> LL1::first(const string &s) {
 	}
 }
 
-void LL1::buildFirst() {
-	for(auto prod: G) first(prod.prod);
+set<char> LL1::follow(const Prod &prod) {
+	set<char> folw = FOLLOW[prod.noTerminal];
+	if(folw.size() != 0 && !(folw.size() == 1 && folw.find('#') != folw.end()))
+		return folw;
+
+	for(auto p:G) { // 寻找候选式
+		for(auto s: p.selection) {
+			for(unsigned int i=0; i<s.length(); ++i) {
+				if(s[i] == prod.noTerminal) { // 候选式中找到非终结符
+					if(i+1 < s.length()) { // 不是最后一个
+						char sym = s[i+1];
+						if(VT.find(sym) != VT.end() && sym != '@') { // 终结符，加入follow集中
+							FOLLOW[prod.noTerminal].insert(sym);
+						}
+						else { // 非终结符
+							set<char> f = FIRST[sym];
+							FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
+							if(f.find('@') != f.end()) { // 非终结符推出@，移除@符号
+								FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@'));
+								if(i+1 == s.length() - 1 && sym != s[i]) { // 最后一个非终结符能推出@，将Follow(A)加入Follow(B)中
+									set<char> ff = follow(p.prod);
+									FOLLOW[prod.noTerminal].insert(ff.begin(), ff.end());
+								}
+							}
+						}
+					}
+					else { // 最后一个符号
+						if(p.noTerminal != s[i]) {
+							set<char> ff = follow(p.prod); // 将Follow(A)加入Follow(B)中
+							FOLLOW[prod.noTerminal].insert(ff.begin(), ff.end());
+						}
+					}
+				}
+			}
+		}
+	}
+	return FOLLOW[prod.noTerminal];
+}
+
+void LL1::buildFF() {
+	for(auto prod: G) first(prod.prod); // 求first集
+
+	FOLLOW[G[0].noTerminal].insert('#'); // 将结束符放入开始符号中
+	for(auto prod: G) follow(prod); // 求follow集
+
 	return;
 }
 
-void LL1::show() {
+
+void LL1::debug() {
 	printf("VT: \n");
 	for(auto c: VT) {
 		printf("%c, ", c);
@@ -183,6 +230,14 @@ void LL1::show() {
 		}
 		printf("}\n");
 	}
+
+	for(auto prod:G) {
+		printf("FOLLOW(%c)= {", prod.noTerminal);
+		for(auto c:FOLLOW[prod.noTerminal]) {
+			printf("%c,", c);
+		}
+		printf("}\n");
+	}
 }
 
 int main() {
@@ -190,8 +245,8 @@ int main() {
 	string in;
 	while(cin >> in)
 		ll.addProd(Prod(in));
-	ll.buildFirst();
-	ll.show();
+	ll.buildFF();
+	ll.debug();
 
 	return 0;
 }

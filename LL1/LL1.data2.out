@@ -1,0 +1,32 @@
+VT: 
+(, ), *, +, @, i, 
+VN: 
+A, B, E, F, T, 
+noTerminal: E
+selections: 
+TA
+noTerminal: A
+selections: 
++TA
+@
+noTerminal: T
+selections: 
+FB
+noTerminal: B
+selections: 
+*FB
+@
+noTerminal: F
+selections: 
+(E)
+i
+FIRST(E)= {(,i,}
+FIRST(A)= {+,@,}
+FIRST(T)= {(,i,}
+FIRST(B)= {*,@,}
+FIRST(F)= {(,i,}
+FOLLOW(E)= {#,),}
+FOLLOW(A)= {#,),}
+FOLLOW(T)= {#,),+,}
+FOLLOW(B)= {#,),+,}
+FOLLOW(F)= {#,),*,+,}
