@@ -4,4 +4,4 @@ T->FB
 B->*FB|@
 F->(E)|i
 #
-i*i+i
+i*(i+i)+i

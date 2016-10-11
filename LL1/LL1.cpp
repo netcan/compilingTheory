@@ -26,42 +26,12 @@
 						神兽保佑，代码无BUG!
 *************************************************************************/
 
-#include <iostream>
-#include <ctype.h>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <map>
-#include <set>
-using namespace std;
-
-class Prod { // 产生式
-	friend class LL1;
-	private:
-		string prod; // 产生式
-		char noTerminal; // 产生式左部非终结符名字
-		set<string> selection; // 候选式集合
-		set<char> Vn; // 非终结符
-		set<char> Vt; // 终结符
-		string cut(int i, int j) {
-			return string(prod.begin() + i, prod.begin() + j);
-		}
-		friend bool operator == (const Prod &a, const char &c) {
-			return a.noTerminal == c;
-		}
-
-		bool isValid; // 产生式是否合法
-
-	public:
-		Prod(const string &in);
-		bool split(); // 分割终结符、非终结符、产生式集合、左部非终结符名字，返回分割是否成功
-};
+#include "LL1.h"
 
 Prod::Prod(const string &in) {
 	prod = in;
 	isValid = false;
 	split();
-	// printf("split(%d)\n", split());
 }
 
 bool Prod::split() {
@@ -82,44 +52,8 @@ bool Prod::split() {
 		i = j;
 	}
 
-	// printf("noTerminal:%c \n", noTerminal);
-
-	// printf("selections: \n");
-	// for(auto s: selection)
-		// cout << s << endl;
-	// printf("Vt: \n");
-	// for(auto c: Vt)
-		// cout << c << endl;
-	// printf("Vn: \n");
-	// for(auto c: Vn)
-		// cout << c << endl;
-
 	return isValid = true;
 }
-
-
-class LL1 {
-	private: vector<Prod> G; // 文法G
-		set<char> VN; // 非终结符
-		set<char> VT; // 终结符
-		map<char, set<char> > FIRST; // first集
-		map<char, set<char> > FOLLOW; // follow集
-		map<pair<char, char>, string> M; // 分析表
-		set<char> first(const string &s);
-		set<char> follow(const Prod &prod);
-		vector<char> parse; // 分析栈
-		vector<char> indata; // 输入表达式栈
-		void parseTable();
-	public:
-		bool addProd(const Prod & prod); // 添加产生式
-		void debug(); // 输出相关结果
-		void build(); // 建立first、follow集、分析表
-		void showIndataStack(); // 输出输入串内容
-		void showParseStack(); // 输出分析栈内容
-		void loadIndata(const string &s); // 输入串入栈
-		void parser(); // LL1预测分析
-		void error(); // 错误处理
-};
 
 bool LL1::addProd(const Prod &prod) {
 	if(prod.isValid) {
@@ -251,6 +185,7 @@ void LL1::build() {
 	for(auto prod: G) follow(prod); // 求follow集
 
 	parseTable(); // 预测分析表
+	debug();
 	// 求完表后，将@替换为#
 	VT.erase(VT.find('@'));
 	VT.insert('#');
@@ -364,19 +299,19 @@ void LL1::debug() {
 
 }
 
-int main() {
-	LL1 ll;
+void LL1::run() {
 	string in;
 	while(cin >> in && in != "#") // 读取文法
-		ll.addProd(Prod(in));
-	ll.build();
-	ll.debug();
-
+		addProd(Prod(in));
+	build();
 	cin >> in; // 表达式
-	ll.loadIndata(in);
-	ll.showIndataStack();
-	puts("");
-	ll.parser();
+	loadIndata(in);
+	parser();
+}
+
+int main() {
+	LL1 ll;
+	ll.run();
 
 	return 0;
 }

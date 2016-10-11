@@ -1,5 +1,5 @@
 VT: 
-#, (, ), *, +, -, /, i, 
+(, ), *, +, -, /, @, i, 
 VN: 
 E, F, G, S, T, 
 noTerminal: E->TG
@@ -18,13 +18,12 @@ FOLLOW(T)= {#,),+,-,}
 FOLLOW(S)= {#,),+,-,}
 FOLLOW(F)= {#,),*,+,-,/,}
 Parse Table:
-	#	(	)	*	+	-	/	i
- E|		TG						TG
- G|	@		@		+TG	-TG		
- T|		FS						FS
- S|	@		@	*FS	@	@	/FS	
- F|		(E)						i
-i+i*i#
+	(	)	*	+	-	/	@	i
+ E|	TG							TG
+ G|		@		+TG	-TG			
+ T|	FS							FS
+ S|		@	*FS	@	@	/FS		
+ F|	(E)							i
 step	parseStack	indataStack	production
 0	#E		i+i*i#		
 1	#GT		i+i*i#		E->TG

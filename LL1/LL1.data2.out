@@ -1,5 +1,5 @@
 VT: 
-#, (, ), *, +, i, 
+(, ), *, +, @, i, 
 VN: 
 A, B, E, F, T, 
 noTerminal: E->TA
@@ -18,29 +18,41 @@ FOLLOW(T)= {#,),+,}
 FOLLOW(B)= {#,),+,}
 FOLLOW(F)= {#,),*,+,}
 Parse Table:
-	#	(	)	*	+	i
- E|		TA				TA
- A|	@		@		+TA	
- T|		FB				FB
- B|	@		@	*FB	@	
- F|		(E)				i
-i*i+i#
+	(	)	*	+	@	i
+ E|	TA					TA
+ A|		@		+TA		
+ T|	FB					FB
+ B|		@	*FB	@		
+ F|	(E)					i
 step	parseStack	indataStack	production
-0	#E		i*i+i#		
-1	#AT		i*i+i#		E->TA
-2	#ABF		i*i+i#		T->FB
-3	#ABi		i*i+i#		F->i
-4	#AB		*i+i#		
-5	#ABF*		*i+i#		B->*FB
-6	#ABF		i+i#		
-7	#ABi		i+i#		F->i
-8	#AB		+i#		
-9	#A		+i#		B->@
-10	#AT+		+i#		A->+TA
-11	#AT		i#		
-12	#ABF		i#		T->FB
-13	#ABi		i#		F->i
-14	#AB		#		
-15	#A		#		B->@
-16	#		#		A->@
+0	#E		i*(i+i)+i#		
+1	#AT		i*(i+i)+i#		E->TA
+2	#ABF		i*(i+i)+i#		T->FB
+3	#ABi		i*(i+i)+i#		F->i
+4	#AB		*(i+i)+i#		
+5	#ABF*		*(i+i)+i#		B->*FB
+6	#ABF		(i+i)+i#		
+7	#AB)E(		(i+i)+i#		F->(E)
+8	#AB)E		i+i)+i#		
+9	#AB)AT		i+i)+i#		E->TA
+10	#AB)ABF		i+i)+i#		T->FB
+11	#AB)ABi		i+i)+i#		F->i
+12	#AB)AB		+i)+i#		
+13	#AB)A		+i)+i#		B->@
+14	#AB)AT+		+i)+i#		A->+TA
+15	#AB)AT		i)+i#		
+16	#AB)ABF		i)+i#		T->FB
+17	#AB)ABi		i)+i#		F->i
+18	#AB)AB		)+i#		
+19	#AB)A		)+i#		B->@
+20	#AB)		)+i#		A->@
+21	#AB		+i#		
+22	#A		+i#		B->@
+23	#AT+		+i#		A->+TA
+24	#AT		i#		
+25	#ABF		i#		T->FB
+26	#ABi		i#		F->i
+27	#AB		#		
+28	#A		#		B->@
+29	#		#		A->@
 Parse Success!
