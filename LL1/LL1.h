@@ -71,12 +71,13 @@ class LL1 {
 		void parseTable();
 	public:
 		bool addProd(const Prod & prod); // 添加产生式
-		void debug(); // 输出相关结果
+		void info(); // 输出相关结果
+		void tableInfo(); // 输出表
 		void build(); // 建立first、follow集、分析表
 		void showIndataStack(); // 输出输入串内容
 		void showParseStack(); // 输出分析栈内容
 		void loadIndata(const string &s); // 输入串入栈
 		void parser(); // LL1预测分析
-		void error(); // 错误处理
+		void error(int step); // 错误处理
 		void run(); // 运行LL1
 };

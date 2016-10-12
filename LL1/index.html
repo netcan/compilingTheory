@@ -1,0 +1,213 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>LL1 parser by netcan</title>
+		<script src="../common/jquery.min.js"></script>
+		<link href="../common/semantic.min.css" rel="stylesheet">
+		<link href="../common/Treant.css" rel="stylesheet">
+	</head>
+	<body>
+		<div class="ui container">
+			<h1 class="header">LL1 parser by netcan</h1>
+			<div id="parserTree" style="width: 100%; height: 40%"></div>
+			<div class="ui grid">
+				<!-- 输入串，文法，first集合，follow集合 -->
+				<div class="row">
+					<div class="four wide column">
+						<div class="ui stacked segment">
+							<div class="ui form">
+								<div class="field">
+									<label for="indata">输入串</label>
+									<input type="text" id="indata">
+								</div>
+								<div class="field">
+									<label for="grammar">输入文法</label>
+									<textarea id="grammar"></textarea>
+								</div>
+								<button class="small fluid ui submit button" type="submit" id="submit">LL1分析！</button>
+							</div>
+						</div>
+						<div class="ui stacked segment">
+							<h4 class="ui horizontal divider header">
+								First & Follow
+							</h4>
+							<div id="ff"></div>
+						</div>
+					</div>
+					<!-- 分析表，分析过程 -->
+					<div class="six wide column">
+						<div class="ui raised segment">
+							<h4 class="ui horizontal divider header">
+								Parser
+							</h4>
+							<table class="ui striped celled table">
+								<thead>
+									<tr>
+										<th>Step</th>
+										<th>ParseStack</th>
+										<th>InputStack</th>
+										<th>Production</th>
+									</tr>
+								</thead>
+								<tbody id="parser">
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="six wide column">
+						<div class="row">
+							<div class="ui piled segment">
+								<h4 class="ui horizontal divider header">
+									Parse Table
+								</h4>
+								<table class="ui striped celled definition table">
+									<thead>
+										<tr id="pth">
+										</tr>
+									</thead>
+									<tbody id="ptb">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="../common/semantic.min.js"></script>
+		<script src="../common/raphael.js"></script>
+		<script src="../common/Treant.js"></script>
+		<script>
+
+			function ParserTree(pt, production) { // 递归构建树
+				// console.log(production);
+				var p = production.match(/([A-Z])->(.*)/);
+				var noTerminal = p[1], Right = p[2];
+				if(typeof pt['text'] === "undefined") {
+					pt['text'] = {
+						name: noTerminal
+					}
+					pt['children'] = [];
+					for(var i=0; i< Right.length; ++i)
+						pt['children'].push({text: { name: Right[i] }});
+				} else {
+					if(pt['text']['name'] != noTerminal) {
+						if(typeof pt['children'] != "undefined")
+							for(var i=0, len=pt['children'].length;  i < len; ++i) {
+								var child = pt['children'][i];
+								ParserTree(child, production);
+							}
+					}
+					else {
+						if(typeof pt['children'] === "undefined") {
+							pt['children'] = [];
+							for(var i=0; i< Right.length; ++i) {
+								pt['children'].push({text: { name: Right[i] }});
+							}
+						} else {
+							for(var i=0, len=pt['children'].length;  i < len; ++i) {
+								var child = pt['children'][i];
+								if(child['text']['name'] == noTerminal)
+									ParserTree(child, production);
+							}
+
+						}
+					}
+				}
+			}
+
+			$("#submit").click(function() {
+				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
+				//	console.log(data);
+				$.ajax({
+					url: "LL1.php",
+					datatype: "json",
+					method: "POST",
+					data: {"data": data},
+					success: function(res, status, jqxhr) {
+						console.log(res);
+						// first and follow
+						var ff = '';
+						for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
+							var first = res['FIRST'][i];
+							ff += '<p>FIRST('+ first['noTerminal'] +') = {';
+								for(var j = 0, jlen = first['Terminal'].length; j < jlen; ++j)
+									ff += (j==0?" ":", ") + first['Terminal'][j];
+							ff += ' }</p>'
+						}
+						for(var i = 0, len = res['FOLLOW'].length; i<len; ++i) {
+							var follow = res['FIRST'][i];
+							ff += '<p>FOLLOW('+ follow['noTerminal'] +') = {';
+								for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
+									ff += (j==0?" ":", ") + follow['Terminal'][j];
+							ff += ' }</p>'
+						}
+						$('#ff').html(ff);
+
+						// parse table
+						var pth = '<th></th>';
+						var table = res['Table'];
+						for(var i=0, len = table['Header'].length; i < len; ++i)
+							pth += '<th>'+ table['Header'][i] +'</th>';
+						var ptb = '';
+						for(var i=0, len = table['Body'].length; i < len; ++i) {
+							var row = table['Body'][i];
+							ptb += '<tr><td>' + row['noTerminal'] + '</td>';
+							for(var j=0, jlen = row['production'].length; j < jlen; ++j)
+								ptb += '<td>' + row['production'][j] + '</td>';
+							ptb += '</tr>'
+						}
+
+						// console.log(ptb);
+						$('#pth').html(pth);
+						$('#ptb').html(ptb);
+
+						// parser
+						var parser = '';
+						var parserTree = {};
+						parserTree['chart'] = {
+							container: "#parserTree",
+						};
+						parserTree['nodeStructure'] = { };
+
+						var isMatch = new RegExp('match');
+						for(var i=0, len = res['Parser'].length; i < len; ++i) {
+							var row = res['Parser'][i];
+							var production = res['Parser'][(i+1) % len]['production'];
+							if(! isMatch.test(production) && production.length != 0 && production != "ERROR")
+								ParserTree(parserTree['nodeStructure'], production);
+
+							parser += '<tr class="' + (row['parseStack'] == "ERROR"?"negative":"") + '"><td>' + i + '</td><td>' + row['parseStack'] + '</td>' +
+								'<td>' + row['indataStack'] + '</td>' +
+								'<td>' + production + '</td>' +
+								'</th></tr>';
+						}
+						// console.log(parserTree);
+						$('#parser').html(parser);
+
+						$('#parserTree').html("");
+						Treant(parserTree, function() {
+							$('#parserTree').css('height', $('svg').height())
+						});
+					}
+				})
+			});
+
+			$(document).ready(function() {
+				$('#indata').val('i*i+i*(i+i)');
+				$('#grammar').val(
+						"E->TG\n" +
+						"G->+TG|-TG\n" +
+						"G->@\n" +
+						"T->FS\n" +
+						"S->*FS|/FS\n" +
+						"S->@\n" +
+						"F->(E)\n" +
+						"F->i"
+						);
+				$('#submit').click();
+			});
+		</script>
+
+	</body>
+</html>

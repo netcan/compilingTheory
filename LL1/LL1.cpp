@@ -185,10 +185,11 @@ void LL1::build() {
 	for(auto prod: G) follow(prod); // 求follow集
 
 	parseTable(); // 预测分析表
-	debug();
+	info();
 	// 求完表后，将@替换为#
 	VT.erase(VT.find('@'));
 	VT.insert('#');
+	tableInfo();
 
 	return;
 }
@@ -209,22 +210,35 @@ void LL1::loadIndata(const string &s) {
 		indata.push_back(s[i]);
 }
 
-void LL1::error() {
-	printf("Parse Error!\n");
+void LL1::error(int step) {
+	printf("{ \"step\": %d, ", step++);
+
+	printf("\"parseStack\": \"ERROR\""
+			", \"indataStack\": \"ERROR\""
+			", \"production\": \"ERROR\""
+			"}\n");
 }
 
 void LL1::parser() {
 	parse.push_back('#');
 	parse.push_back(G[0].noTerminal); // 文法开始符号
-	printf("step\tparseStack\tindataStack\tproduction\n");
-	unsigned int ptop, itop, step = 0;
-	string prod; // 候选式
-	while((ptop = parse.size() - 1) > 0) {
+	// printf("step\tparseStack\tindataStack\tproduction\n");
+	printf("\"Parser\": [");
+	int i = 0; // 处理打印的第一个逗号
+
+	int ptop, itop, step = 0;
+	string prod = ""; // 候选式
+	while((ptop = parse.size() - 1) >= 0) {
 		itop = indata.size() - 1;
 
-		printf("%d\t", step++);
-		showParseStack(); printf("\t\t");
-		showIndataStack(); printf("\t\t%s\n", prod.c_str());
+		printf("%s{ \"step\": %d, ", i++==0?" ":", ", step++);
+
+		printf("\"parseStack\": \"");
+		showParseStack();
+		printf("\", \"indataStack\": \"");
+		showIndataStack();
+		printf("\", \"production\": \"%s\"", prod.c_str());
+		printf("}\n");
 
 		// begin
 		prod = "";
@@ -233,11 +247,14 @@ void LL1::parser() {
 		parse.pop_back();
 		if(VT.find(X) != VT.end()) { // 终结符
 			if(X != curc) {
-				error();
+				printf("%s", i==0?" ":", ");
+				error(step);
 				break;
 			}
-			else
+			else {
 				indata.pop_back();
+				prod = "match " + string(1, X);
+			}
 		} else if(X == '@')
 			continue;
 		else { // 终结符
@@ -248,58 +265,95 @@ void LL1::parser() {
 						parse.push_back(prod[i]);
 			}
 			else {
-				error();
+				printf("%s", i==0?" ":", ");
+				error(step);
 				break;
 			}
 			prod = string(1, X) + "->" + prod;
 		}
 	}
-	printf("%d\t", step++);
-	showParseStack(); printf("\t\t");
-	showIndataStack(); printf("\t\t%s\n", prod.c_str());
-	printf("Parse Success!\n");
+
+	printf("]\n");
+	// printf("Parse Success!\n");
 }
 
-void LL1::debug() {
-	printf("VT: \n");
+void LL1::info() {
+	printf("\"VT\": [");
+	int i = 0; // 处理打印的第一个逗号
+
 	for(auto c: VT) {
-		printf("%c, ", c);
+		printf("%s\"%c\"", i == 0?" ":", ", c);
+		++i;
 	}
-	printf("\nVN: \n");
-	for(auto c: VN)
-		printf("%c, ", c);
-	puts("");
-	for(auto p: G)
-		printf("noTerminal: %s\n", p.prod.c_str());
+	printf("], \n");
+
+	i = 0;
+	printf("\"VN\": [");
+	for(auto c: VN) {
+		printf("%s\"%c\"", i == 0?" ":", ", c);
+		++i;
+	}
+	printf("], \n");
+
+	// for(auto p: G)
+		// printf("noTerminal: %s\n", p.prod.c_str());
+
+	printf("\"FIRST\": [");
+	i = 0;
 	for(auto prod:G) {
-		printf("FIRST(%c)= {", prod.noTerminal);
+		printf("\n%c{ \"noTerminal\": \"%c\", \"Terminal\": [", i==0?' ':',', prod.noTerminal);
+		int j = 0;
 		for(auto c:FIRST[prod.noTerminal]) {
-			printf("%c,", c);
+			printf("%s\"%c\"", j == 0?" ":", ", c);
+			++j;
 		}
-		printf("}\n");
+		printf("] }");
+		++i;
 	}
+	printf("], \n");
 
+	printf("\"FOLLOW\": [");
+	i = 0;
 	for(auto prod:G) {
-		printf("FOLLOW(%c)= {", prod.noTerminal);
+		printf("\n%c{ \"noTerminal\": \"%c\", \"Terminal\": [", i==0?' ':',', prod.noTerminal);
+		int j = 0;
 		for(auto c:FOLLOW[prod.noTerminal]) {
-			printf("%c,", c);
+			printf("%s\"%c\"", j == 0?" ":", ", c);
+			++j;
 		}
-		printf("}\n");
+		printf("] }");
+		++i;
 	}
-	printf("Parse Table:\n");
-	for(auto c:VT) // 终结符，表头
-		printf("\t%c", c);
-	puts("");
-	for(auto prod:G) {
-		printf("%2c|", prod.noTerminal);
-		for(auto c:VT) // 终结符
-			printf("\t%s", M[make_pair(prod.noTerminal, c)].c_str());
-		puts("");
-	}
+	printf("], \n");
+}
 
+void LL1::tableInfo() {
+	printf("\"Table\": {\n");
+	printf("\"Header\": [");
+	for(auto c:VT)  // 终结符，表头， #号放在最后一列
+		if(c != '#')
+			printf("\"%c\", ", c);
+	printf("\"#\"");
+	printf("], \n");
+
+	printf("\"Body\": [");
+	int i = 0;
+	for(auto prod:G) {
+		printf("%s{\"noTerminal\": \"%c\", ", i == 0?" ":", ", prod.noTerminal);
+		printf("\"production\": [");
+		for(auto c:VT) // 终结符
+			if(c != '#')
+				printf("\"%s\", ", M[make_pair(prod.noTerminal, c)].c_str());
+		printf("\"%s\"", M[make_pair(prod.noTerminal, '#')].c_str());
+
+		printf("]}\n");
+		++i;
+	}
+	printf("] }, \n");
 }
 
 void LL1::run() {
+	puts("{"); // 输出json，与前端交互
 	string in;
 	while(cin >> in && in != "#") // 读取文法
 		addProd(Prod(in));
@@ -307,6 +361,7 @@ void LL1::run() {
 	cin >> in; // 表达式
 	loadIndata(in);
 	parser();
+	puts("}");
 }
 
 int main() {
