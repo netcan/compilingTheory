@@ -5,6 +5,11 @@
 		<script src="../common/jquery.min.js"></script>
 		<link href="../common/semantic.min.css" rel="stylesheet">
 		<link href="../common/Treant.css" rel="stylesheet">
+		<style>
+			.node-name {
+				font-weight: bolder;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="ui container">
@@ -86,7 +91,7 @@
 				var noTerminal = p[1], Right = p[2];
 				if(typeof pt['text'] === "undefined") {
 					pt['text'] = {
-						name: noTerminal
+						name: noTerminal,
 					}
 					pt['children'] = [];
 					for(var i=0; i< Right.length; ++i)
@@ -97,8 +102,8 @@
 						if(typeof pt['children'] != "undefined")
 							for(var i=0, len=pt['children'].length;  i < len; ++i) {
 								var child = pt['children'][i];
-								var res = ParserTree(child, production);
-								if(res) return true;
+								if(ParserTree(child, production))
+									return true;
 							}
 					}
 					else {
@@ -110,8 +115,8 @@
 						} else {
 							for(var i=0, len=pt['children'].length;  i < len; ++i) {
 								var child = pt['children'][i];
-								var res = ParserTree(child, production);
-								if(res) return true;
+								if(ParserTree(child, production))
+									return true;
 							}
 
 						}
@@ -169,7 +174,7 @@
 						var parser = '';
 						var parserTree = {};
 						parserTree['chart'] = {
-							container: "#parserTree",
+							container: "#parserTree"
 						};
 						parserTree['nodeStructure'] = { };
 
