@@ -358,6 +358,7 @@ void LL1::run() {
 	while(cin >> in && in != "#") // 读取文法
 		addProd(Prod(in));
 	build();
+	in = "";
 	cin >> in; // 表达式
 	loadIndata(in);
 	parser();

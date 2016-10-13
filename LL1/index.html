@@ -24,7 +24,7 @@
 									<label for="grammar">输入文法</label>
 									<textarea id="grammar"></textarea>
 								</div>
-								<button class="small fluid ui submit button" type="submit" id="submit">LL1分析！</button>
+								<!-- <button class="small fluid ui submit button" type="submit" id="submit">LL1分析！</button> -->
 							</div>
 						</div>
 						<div class="ui stacked segment">
@@ -81,6 +81,7 @@
 
 			function ParserTree(pt, production) { // 递归构建树
 				// console.log(production);
+
 				var p = production.match(/([A-Z])->(.*)/);
 				var noTerminal = p[1], Right = p[2];
 				if(typeof pt['text'] === "undefined") {
@@ -90,25 +91,27 @@
 					pt['children'] = [];
 					for(var i=0; i< Right.length; ++i)
 						pt['children'].push({text: { name: Right[i] }});
+					return true;
 				} else {
 					if(pt['text']['name'] != noTerminal) {
 						if(typeof pt['children'] != "undefined")
 							for(var i=0, len=pt['children'].length;  i < len; ++i) {
 								var child = pt['children'][i];
-								ParserTree(child, production);
+								var res = ParserTree(child, production);
+								if(res) return true;
 							}
 					}
 					else {
 						if(typeof pt['children'] === "undefined") {
 							pt['children'] = [];
-							for(var i=0; i< Right.length; ++i) {
+							for(var i=0; i< Right.length; ++i)
 								pt['children'].push({text: { name: Right[i] }});
-							}
+							return true;
 						} else {
 							for(var i=0, len=pt['children'].length;  i < len; ++i) {
 								var child = pt['children'][i];
-								if(child['text']['name'] == noTerminal)
-									ParserTree(child, production);
+								var res = ParserTree(child, production);
+								if(res) return true;
 							}
 
 						}
@@ -116,7 +119,7 @@
 				}
 			}
 
-			$("#submit").click(function() {
+			function update() {
 				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
 				//	console.log(data);
 				$.ajax({
@@ -125,7 +128,7 @@
 					method: "POST",
 					data: {"data": data},
 					success: function(res, status, jqxhr) {
-						console.log(res);
+						// console.log(res);
 						// first and follow
 						var ff = '';
 						for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
@@ -174,8 +177,10 @@
 						for(var i=0, len = res['Parser'].length; i < len; ++i) {
 							var row = res['Parser'][i];
 							var production = res['Parser'][(i+1) % len]['production'];
-							if(! isMatch.test(production) && production.length != 0 && production != "ERROR")
+							if(! isMatch.test(production) && production.length != 0 && production != "ERROR") {
+								var ok = false; // 插入一个子树
 								ParserTree(parserTree['nodeStructure'], production);
+							}
 
 							parser += '<tr class="' + (row['parseStack'] == "ERROR"?"negative":"") + '"><td>' + i + '</td><td>' + row['parseStack'] + '</td>' +
 								'<td>' + row['indataStack'] + '</td>' +
@@ -191,7 +196,15 @@
 						});
 					}
 				})
-			});
+			}
+
+			/*
+			   $("#submit").click(function() {
+			   update();
+			   });
+			*/
+			$("#indata").on("keyup paste", update);
+			$("#grammar").on("keyup paste", update);
 
 			$(document).ready(function() {
 				$('#indata').val('i*i+i*(i+i)');
@@ -205,7 +218,7 @@
 						"F->(E)\n" +
 						"F->i"
 						);
-				$('#submit').click();
+				update();
 			});
 		</script>
 
