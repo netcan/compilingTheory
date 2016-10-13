@@ -9,6 +9,11 @@
 			.node-name {
 				font-weight: bolder;
 			}
+			.parserMaxh {
+				display: block;
+				max-height: 550px;
+				overflow-y: auto;
+			}
 		</style>
 	</head>
 	<body>
@@ -41,7 +46,7 @@
 					</div>
 
 					<!-- 分析表 -->
-					<div class="six wide column">
+					<div class="six wide column" id="parseTable">
 						<div class="ui stacked segment">
 							<h4 class="ui horizontal divider header">
 								First & Follow
@@ -71,18 +76,20 @@
 							<h4 class="ui horizontal divider header">
 								Parser
 							</h4>
-							<table class="ui fixed  stackable striped selectable celled table">
-								<thead>
-									<tr>
-										<th class="three wide">Step</th>
-										<th>ParseStack</th>
-										<th>InputStack</th>
-										<th>Production</th>
-									</tr>
-								</thead>
-								<tbody id="parser">
-								</tbody>
-							</table>
+							<div class="parserMaxh">
+								<table class="ui fixed  stackable striped selectable celled table">
+									<thead>
+										<tr>
+											<th class="three wide">Step</th>
+											<th>ParseStack</th>
+											<th>InputStack</th>
+											<th>Production</th>
+										</tr>
+									</thead>
+									<tbody id="parser">
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -206,6 +213,7 @@
 						Treant(parserTree, function() {
 							$('#parserTree').css('height', $('svg').height())
 						});
+						$('.parserMaxh').css('max-height', $('#parseTable').height() - 50);
 					}
 				})
 			}
