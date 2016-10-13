@@ -98,15 +98,14 @@ set<char> LL1::first(const string &s) {
 				return FIRST[s[0]];
 			}
 		}
-	} else { // 候选式
+	} else { // 候选式X1X2X3X4...
 		set<char> ret;
 		for(unsigned int i=0; i<s.length(); ++i) {
-			char c = s[i]; // 取出一个符号
-			set<char> f = first(string(1, c)); // 逐个符号求first集
+			set<char> f = first(string(1, s[i])); // 逐个符号求first(Xi)集
 			if(f.find('@') != f.end() && s.length() - 1 != i) { // 发现@
 				f.erase(f.find('@')); // 减去@
 				ret.insert(f.begin(), f.end()); // 放入first集合
-			} else {
+			} else { // 无@，则不需要求下去了
 				ret.insert(f.begin(), f.end());
 				break;
 			}
@@ -123,42 +122,14 @@ set<char> LL1::follow(const Prod &prod) {
 	// X->aAb
 	for(auto p:G) { // 寻找候选式
 		for(auto s: p.selection) { // 遍历候选式
-			// unsigned long loc = 0;
-			// if((loc = s.find(prod.noTerminal)) != string::npos) { // 找到非终结符
-				// set<char> f = first(p.cut(loc+1, s.length())); // 求first(b)
-				// FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
-				// if(f.find('@') != f.end()) { // 找到@，则follow(X)放入follow(A)
-					// FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@')); // 移除@
-					// set<char> folw = follow(p);
-					// FOLLOW[prod.noTerminal].insert(folw.begin(), folw.end());
-				// }
-			// }
-
-			for(unsigned int i=0; i<s.length(); ++i) {
-				if(s[i] == prod.noTerminal) { // 候选式中找到非终结符
-					if(i+1 < s.length()) { // 不是最后一个
-						char sym = s[i+1];
-						if(VT.find(sym) != VT.end() && sym != '@') { // 终结符，加入follow集中
-							FOLLOW[prod.noTerminal].insert(sym);
-						}
-						else { // 非终结符
-							set<char> f = FIRST[sym];
-							FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
-							if(f.find('@') != f.end()) { // 非终结符推出@，移除@符号
-								FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@'));
-								if(i+1 == s.length() - 1 && sym != s[i]) { // 最后一个非终结符能推出@，将Follow(A)加入Follow(B)中
-									set<char> ff = follow(p.prod);
-									FOLLOW[prod.noTerminal].insert(ff.begin(), ff.end());
-								}
-							}
-						}
-					}
-					else { // 最后一个符号
-						if(p.noTerminal != s[i]) {
-							set<char> ff = follow(p.prod); // 将Follow(A)加入Follow(B)中
-							FOLLOW[prod.noTerminal].insert(ff.begin(), ff.end());
-						}
-					}
+			unsigned long loc = 0;
+			if((loc = s.find(prod.noTerminal)) != string::npos) { // 找到非终结符
+				set<char> f = first(string(s.begin() + loc+1, s.begin() + s.length())); // 求first(b)
+				FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
+				if(f.find('@') != f.end()) { // 找到@，则follow(X)放入follow(A)
+					FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@')); // 移除@
+					set<char> folw = follow(p); // 递归求follow(X)
+					FOLLOW[prod.noTerminal].insert(folw.begin(), folw.end()); // follow(X)加入follow(A)中
 				}
 			}
 		}
@@ -169,8 +140,8 @@ set<char> LL1::follow(const Prod &prod) {
 void LL1::parseTable() { // X->a
 	for(auto prod: G) { // 枚举产生式
 		for(auto sel:prod.selection) { // 枚举候选式
-			set<char> folw = first(sel);
-			for(auto terminal: folw)
+			set<char> f = first(sel); // 求first集合
+			for(auto terminal: f)
 				if(terminal == '@')  // 存在@，将follow(x)的每个终结符放入表中
 					for(auto term: FOLLOW[prod.noTerminal])
 						M[make_pair(prod.noTerminal, term)] = sel;
