@@ -160,7 +160,7 @@
 							ff += ' }</p>'
 						}
 						for(var i = 0, len = res['FOLLOW'].length; i<len; ++i) {
-							var follow = res['FIRST'][i];
+							var follow = res['FOLLOW'][i];
 							ff += '<p>FOLLOW('+ follow['noTerminal'] +') = {';
 								for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
 									ff += (j==0?" ":", ") + follow['Terminal'][j];
