@@ -27,7 +27,7 @@
 			<!-- 分析树 -->
 			<div id="parserTree" style="width: 100%; height: 40%"></div>
 			<div class="ui grid">
-				<!-- 输入串，文法，first集合，follow集合 -->
+				<!-- 输入串，文法 -->
 				<div class="row">
 					<div class="four wide column">
 						<div class="ui stacked segment">
@@ -45,12 +45,23 @@
 						</div>
 					</div>
 
-					<!-- 分析表 -->
+					<!-- 分析表，first集合，follow集合 -->
 					<div class="six wide column" id="parseTable">
-						<div class="ui stacked segment">
+						<div class="ui raised segment">
 							<h4 class="ui horizontal divider header">
 								First & Follow
 							</h4>
+							<table class="ui striped celled definition table">
+								<thead>
+									<tr class="center aligned">
+										<th></th>
+										<th>FIRST</th>
+										<th>FOLLOW</th>
+									</tr>
+								</thead>
+								<tbody id="ff">
+								</tbody>
+							</table>
 							<div id="ff"></div>
 						</div>
 						<div class="row">
@@ -72,7 +83,7 @@
 
 					<!-- 分析过程 -->
 					<div class="six wide column">
-						<div class="ui raised segment">
+						<div class="ui piled segment">
 							<h4 class="ui horizontal divider header">
 								Parser
 							</h4>
@@ -154,17 +165,15 @@
 						var ff = '';
 						for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
 							var first = res['FIRST'][i];
-							ff += '<p>FIRST('+ first['noTerminal'] +') = {';
+							var follow = res['FOLLOW'][i];
+							ff += '<tr class="center aligned"><td>' + first['noTerminal'] +'</td><td>{';
 								for(var j = 0, jlen = first['Terminal'].length; j < jlen; ++j)
 									ff += (j==0?" ":", ") + first['Terminal'][j];
-							ff += ' }</p>'
-						}
-						for(var i = 0, len = res['FOLLOW'].length; i<len; ++i) {
-							var follow = res['FOLLOW'][i];
-							ff += '<p>FOLLOW('+ follow['noTerminal'] +') = {';
-								for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
-									ff += (j==0?" ":", ") + follow['Terminal'][j];
-							ff += ' }</p>'
+							ff += '}</td><td>{';
+							for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
+								ff += (j==0?" ":", ") + follow['Terminal'][j];
+							ff += ' }</td></tr>'
+
 						}
 						$('#ff').html(ff);
 
@@ -198,7 +207,7 @@
 						for(var i=0, len = res['Parser'].length; i < len; ++i) {
 							var row = res['Parser'][i];
 							var production = res['Parser'][(i+1) % len]['production'];
-							if(! isMatch.test(production) && production.length != 0 && production != "ERROR") 
+							if(! isMatch.test(production) && production.length != 0 && production != "ERROR")
 								ParserTree(parserTree['nodeStructure'], production);
 
 							parser += '<tr class="' + (row['parseStack'] == "ERROR"?"negative":"") + '"><td>' + i + '</td><td>' + row['parseStack'] + '</td>' +
