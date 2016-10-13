@@ -191,10 +191,8 @@
 						for(var i=0, len = res['Parser'].length; i < len; ++i) {
 							var row = res['Parser'][i];
 							var production = res['Parser'][(i+1) % len]['production'];
-							if(! isMatch.test(production) && production.length != 0 && production != "ERROR") {
-								var ok = false; // 插入一个子树
+							if(! isMatch.test(production) && production.length != 0 && production != "ERROR") 
 								ParserTree(parserTree['nodeStructure'], production);
-							}
 
 							parser += '<tr class="' + (row['parseStack'] == "ERROR"?"negative":"") + '"><td>' + i + '</td><td>' + row['parseStack'] + '</td>' +
 								'<td>' + row['indataStack'] + '</td>' +
