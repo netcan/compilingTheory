@@ -1,58 +1,55 @@
-VT: 
-(, ), *, +, @, i, 
-VN: 
-A, B, E, F, T, 
-noTerminal: E->TA
-noTerminal: A->+TA|@
-noTerminal: T->FB
-noTerminal: B->*FB|@
-noTerminal: F->(E)|i
-FIRST(E)= {(,i,}
-FIRST(A)= {+,@,}
-FIRST(T)= {(,i,}
-FIRST(B)= {*,@,}
-FIRST(F)= {(,i,}
-FOLLOW(E)= {#,),}
-FOLLOW(A)= {#,),}
-FOLLOW(T)= {#,),+,}
-FOLLOW(B)= {#,),+,}
-FOLLOW(F)= {#,),*,+,}
-Parse Table:
-	(	)	*	+	@	i
- E|	TA					TA
- A|		@		+TA		
- T|	FB					FB
- B|		@	*FB	@		
- F|	(E)					i
-step	parseStack	indataStack	production
-0	#E		i*(i+i)+i#		
-1	#AT		i*(i+i)+i#		E->TA
-2	#ABF		i*(i+i)+i#		T->FB
-3	#ABi		i*(i+i)+i#		F->i
-4	#AB		*(i+i)+i#		
-5	#ABF*		*(i+i)+i#		B->*FB
-6	#ABF		(i+i)+i#		
-7	#AB)E(		(i+i)+i#		F->(E)
-8	#AB)E		i+i)+i#		
-9	#AB)AT		i+i)+i#		E->TA
-10	#AB)ABF		i+i)+i#		T->FB
-11	#AB)ABi		i+i)+i#		F->i
-12	#AB)AB		+i)+i#		
-13	#AB)A		+i)+i#		B->@
-14	#AB)AT+		+i)+i#		A->+TA
-15	#AB)AT		i)+i#		
-16	#AB)ABF		i)+i#		T->FB
-17	#AB)ABi		i)+i#		F->i
-18	#AB)AB		)+i#		
-19	#AB)A		)+i#		B->@
-20	#AB)		)+i#		A->@
-21	#AB		+i#		
-22	#A		+i#		B->@
-23	#AT+		+i#		A->+TA
-24	#AT		i#		
-25	#ABF		i#		T->FB
-26	#ABi		i#		F->i
-27	#AB		#		
-28	#A		#		B->@
-29	#		#		A->@
-Parse Success!
+{
+"VT": [ "(", ")", "*", "+", "@", "i"], 
+"VN": [ "A", "B", "E", "F", "T"], 
+"FIRST": [
+ { "noTerminal": "E", "Terminal": [ "(", "i"] }
+,{ "noTerminal": "A", "Terminal": [ "+", "@"] }
+,{ "noTerminal": "T", "Terminal": [ "(", "i"] }
+,{ "noTerminal": "B", "Terminal": [ "*", "@"] }
+,{ "noTerminal": "F", "Terminal": [ "(", "i"] }], 
+"FOLLOW": [
+ { "noTerminal": "E", "Terminal": [ "#", ")"] }
+,{ "noTerminal": "A", "Terminal": [ "#", ")"] }
+,{ "noTerminal": "T", "Terminal": [ "#", ")", "+"] }
+,{ "noTerminal": "B", "Terminal": [ "#", ")", "+"] }
+,{ "noTerminal": "F", "Terminal": [ "#", ")", "*", "+"] }], 
+"Table": {
+"Header": ["(", ")", "*", "+", "i", "#"], 
+"Body": [ {"noTerminal": "E", "production": ["TA", "", "", "", "TA", ""]}
+, {"noTerminal": "A", "production": ["", "@", "", "+TA", "", "@"]}
+, {"noTerminal": "T", "production": ["FB", "", "", "", "FB", ""]}
+, {"noTerminal": "B", "production": ["", "@", "*FB", "@", "", "@"]}
+, {"noTerminal": "F", "production": ["(E)", "", "", "", "i", ""]}
+] }, 
+"Parser": [ { "step": 0, "parseStack": "#E", "indataStack": "i*(i+i)+i#", "production": ""}
+, { "step": 1, "parseStack": "#AT", "indataStack": "i*(i+i)+i#", "production": "E->TA"}
+, { "step": 2, "parseStack": "#ABF", "indataStack": "i*(i+i)+i#", "production": "T->FB"}
+, { "step": 3, "parseStack": "#ABi", "indataStack": "i*(i+i)+i#", "production": "F->i"}
+, { "step": 4, "parseStack": "#AB", "indataStack": "*(i+i)+i#", "production": "match i"}
+, { "step": 5, "parseStack": "#ABF*", "indataStack": "*(i+i)+i#", "production": "B->*FB"}
+, { "step": 6, "parseStack": "#ABF", "indataStack": "(i+i)+i#", "production": "match *"}
+, { "step": 7, "parseStack": "#AB)E(", "indataStack": "(i+i)+i#", "production": "F->(E)"}
+, { "step": 8, "parseStack": "#AB)E", "indataStack": "i+i)+i#", "production": "match ("}
+, { "step": 9, "parseStack": "#AB)AT", "indataStack": "i+i)+i#", "production": "E->TA"}
+, { "step": 10, "parseStack": "#AB)ABF", "indataStack": "i+i)+i#", "production": "T->FB"}
+, { "step": 11, "parseStack": "#AB)ABi", "indataStack": "i+i)+i#", "production": "F->i"}
+, { "step": 12, "parseStack": "#AB)AB", "indataStack": "+i)+i#", "production": "match i"}
+, { "step": 13, "parseStack": "#AB)A", "indataStack": "+i)+i#", "production": "B->@"}
+, { "step": 14, "parseStack": "#AB)AT+", "indataStack": "+i)+i#", "production": "A->+TA"}
+, { "step": 15, "parseStack": "#AB)AT", "indataStack": "i)+i#", "production": "match +"}
+, { "step": 16, "parseStack": "#AB)ABF", "indataStack": "i)+i#", "production": "T->FB"}
+, { "step": 17, "parseStack": "#AB)ABi", "indataStack": "i)+i#", "production": "F->i"}
+, { "step": 18, "parseStack": "#AB)AB", "indataStack": ")+i#", "production": "match i"}
+, { "step": 19, "parseStack": "#AB)A", "indataStack": ")+i#", "production": "B->@"}
+, { "step": 20, "parseStack": "#AB)", "indataStack": ")+i#", "production": "A->@"}
+, { "step": 21, "parseStack": "#AB", "indataStack": "+i#", "production": "match )"}
+, { "step": 22, "parseStack": "#A", "indataStack": "+i#", "production": "B->@"}
+, { "step": 23, "parseStack": "#AT+", "indataStack": "+i#", "production": "A->+TA"}
+, { "step": 24, "parseStack": "#AT", "indataStack": "i#", "production": "match +"}
+, { "step": 25, "parseStack": "#ABF", "indataStack": "i#", "production": "T->FB"}
+, { "step": 26, "parseStack": "#ABi", "indataStack": "i#", "production": "F->i"}
+, { "step": 27, "parseStack": "#AB", "indataStack": "#", "production": "match i"}
+, { "step": 28, "parseStack": "#A", "indataStack": "#", "production": "B->@"}
+, { "step": 29, "parseStack": "#", "indataStack": "#", "production": "A->@"}
+]
+}
