@@ -77,42 +77,32 @@ set<char> LL1::first(const string &s) {
 	if(prod.isValid) { // 产生式
 		if(FIRST[prod.noTerminal].size() != 0) return FIRST[prod.noTerminal];
 		for(auto sel:prod.selection) { // 候选式
-			for(unsigned int i=0; i<sel.length(); ++i) {
-				char c = sel[i];
-				set<char> f = first(string(1, c));
-				if(f.find('@') != f.end() && sel.length() - 1 != i) { // 发现@
-					f.erase(f.find('@')); // 减去@
-					FIRST[prod.noTerminal].insert(f.begin(), f.end()); // 放入first集合
-				} else {
-					FIRST[prod.noTerminal].insert(f.begin(), f.end());
-					break;
-				}
-			}
+			set<char> f = first(sel); // 求出候选式的first集合
+			FIRST[prod.noTerminal].insert(f.begin(), f.end());
 		}
 		return FIRST[prod.noTerminal];
 	}
-	else if(s.length() == 1){ // 非产生式
-		if(VT.find(s[0]) != VT.end()) { // 终结符
-			set<char> res;
-			res.insert(s[0]);
-			return res;
-		}
-		else { // 非终结符、候选式
+	else if(s.length() == 0)  // 空串
+			return set<char>({'@'});
+	else if(s.length() == 1){ // 终结符或非终结符
+		if(VT.find(s[0]) != VT.end())  // 终结符
+			return set<char>({s[0]});
+		else { // 非终结符
 			if(FIRST[s[0]].size() != 0) return FIRST[s[0]];
 			else {
-				vector<Prod>::iterator it = find(G.begin(), G.end(), s[0]);
-				if(*it == s[0]) {
+				vector<Prod>::iterator it = find(G.begin(), G.end(), s[0]); // 求出非终结符的产生式
+				if(it != G.end()) { // 找到产生式
 					set<char> f = first(it->prod);
 					FIRST[s[0]].insert(f.begin(), f.end());
 				}
 				return FIRST[s[0]];
 			}
 		}
-	} else {
+	} else { // 候选式
 		set<char> ret;
 		for(unsigned int i=0; i<s.length(); ++i) {
-			char c = s[i];
-			set<char> f = first(string(1, c));
+			char c = s[i]; // 取出一个符号
+			set<char> f = first(string(1, c)); // 逐个符号求first集
 			if(f.find('@') != f.end() && s.length() - 1 != i) { // 发现@
 				f.erase(f.find('@')); // 减去@
 				ret.insert(f.begin(), f.end()); // 放入first集合
@@ -126,12 +116,24 @@ set<char> LL1::first(const string &s) {
 }
 
 set<char> LL1::follow(const Prod &prod) {
-	set<char> folw = FOLLOW[prod.noTerminal];
-	if(folw.size() != 0 && !(folw.size() == 1 && folw.find('#') != folw.end()))
+	set<char> folw = FOLLOW[prod.noTerminal]; // 求出产生式X->的follow(X)集合
+	if(folw.size() != 0 && !(folw.size() == 1 && folw.find('#') != folw.end())) // 若已求得或为开始符号，直接返回
 		return folw;
 
+	// X->aAb
 	for(auto p:G) { // 寻找候选式
-		for(auto s: p.selection) {
+		for(auto s: p.selection) { // 遍历候选式
+			// unsigned long loc = 0;
+			// if((loc = s.find(prod.noTerminal)) != string::npos) { // 找到非终结符
+				// set<char> f = first(p.cut(loc+1, s.length())); // 求first(b)
+				// FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
+				// if(f.find('@') != f.end()) { // 找到@，则follow(X)放入follow(A)
+					// FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@')); // 移除@
+					// set<char> folw = follow(p);
+					// FOLLOW[prod.noTerminal].insert(folw.begin(), folw.end());
+				// }
+			// }
+
 			for(unsigned int i=0; i<s.length(); ++i) {
 				if(s[i] == prod.noTerminal) { // 候选式中找到非终结符
 					if(i+1 < s.length()) { // 不是最后一个
