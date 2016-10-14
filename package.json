@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "semantic-ui-css": "^2.2.4",
+    "treant-js": "^1.0.1"
+  }
+}
