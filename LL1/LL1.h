@@ -65,7 +65,7 @@ class LL1 {
 		map<char, set<char> > FOLLOW; // follow集
 		map<pair<char, char>, string> M; // 分析表
 		set<char> first(const string &s);
-		set<char> follow(const Prod &prod);
+		void follow();
 		vector<char> parse; // 分析栈
 		vector<char> indata; // 输入表达式栈
 		void parseTable();

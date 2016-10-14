@@ -1,0 +1,18 @@
+{
+"VT": [ "@", "a", "b", "d"], 
+"VN": [ "A", "S"], 
+"FIRST": [
+ { "noTerminal": "S", "Terminal": [ "a", "d"] }
+,{ "noTerminal": "A", "Terminal": [ "@", "b"] }], 
+"FOLLOW": [
+ { "noTerminal": "S", "Terminal": [ "#", "a", "d"] }
+,{ "noTerminal": "A", "Terminal": [ "#", "a", "d"] }], 
+"Table": {
+"Header": ["a", "b", "d", "#"], 
+"Body": [ {"noTerminal": "S", "production": ["aA", "", "d", ""]}
+, {"noTerminal": "A", "production": ["@", "bAS", "@", "@"]}
+] }, 
+"Parser": [ { "step": 0, "parseStack": "#S", "indataStack": "#", "production": ""}
+, { "step": 1, "parseStack": "ERROR", "indataStack": "ERROR", "production": "ERROR"}
+]
+}

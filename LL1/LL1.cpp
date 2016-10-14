@@ -114,27 +114,31 @@ set<char> LL1::first(const string &s) {
 	}
 }
 
-set<char> LL1::follow(const Prod &prod) {
-	set<char> folw = FOLLOW[prod.noTerminal]; // 求出产生式X->的follow(X)集合
-	if(folw.size() != 0 && !(folw.size() == 1 && folw.find('#') != folw.end())) // 若已求得或为开始符号，直接返回
-		return folw;
-
-	// X->aAb
-	for(auto p:G) { // 寻找候选式
-		for(auto s: p.selection) { // 遍历候选式
-			unsigned long loc = 0;
-			if((loc = s.find(prod.noTerminal)) != string::npos) { // 找到非终结符
-				set<char> f = first(string(s.begin() + loc+1, s.begin() + s.length())); // 求first(b)
-				FOLLOW[prod.noTerminal].insert(f.begin(), f.end());
-				if(f.find('@') != f.end()) { // 找到@，则follow(X)放入follow(A)
-					FOLLOW[prod.noTerminal].erase(FOLLOW[prod.noTerminal].find('@')); // 移除@
-					set<char> folw = follow(p); // 递归求follow(X)
-					FOLLOW[prod.noTerminal].insert(folw.begin(), folw.end()); // follow(X)加入follow(A)中
-				}
+// A->aXb，求follow(X)
+void LL1::follow() { // 非递归求法，防止死递归
+	FOLLOW[G[0].noTerminal].insert('#'); // 开始符号放'#'
+	for(auto pp: G) { // 直到follow(X)不在增大
+		unsigned int size = 0;
+		while(size != FOLLOW[pp.noTerminal].size()) {
+			size = FOLLOW[pp.noTerminal].size();
+			for(auto prod: G) { // 求出所有非终结符的follow集合
+				char X = prod.noTerminal;
+				for(auto p: G) // 求出X的follow集合
+					for(auto s: p.selection) { // 逐个候选式找X
+						unsigned long loc = 0;
+						if((loc = s.find(X)) != string::npos) { // 找到非终结符X
+							set<char> f = first(string(s.begin() + loc + 1, s.end())); // 求first(b)
+							FOLLOW[X].insert(f.begin(), f.end()); // 加入到follow(X)中
+							if(f.find('@') != f.end()) {// 找到@
+								FOLLOW[X].erase(FOLLOW[X].find('@')); // 删除@
+								set<char> fw = FOLLOW[p.noTerminal]; // 把follow(A)放入follow(X)
+								FOLLOW[X].insert(fw.begin(), fw.end());
+							}
+						}
+					}
 			}
 		}
 	}
-	return FOLLOW[prod.noTerminal];
 }
 
 void LL1::parseTable() { // X->a
@@ -154,8 +158,8 @@ void LL1::parseTable() { // X->a
 void LL1::build() {
 	for(auto prod: G) first(prod.prod); // 求first集
 
-	FOLLOW[G[0].noTerminal].insert('#'); // 将结束符放入开始符号中
-	for(auto prod: G) follow(prod); // 求follow集
+	// 求follow集
+	follow();
 
 	parseTable(); // 预测分析表
 	info();
