@@ -25,7 +25,12 @@
 		<div class="ui container">
 			<h1 class="header">LL1 parser by netcan</h1>
 			<!-- 分析树 -->
-			<div id="parserTree" style="width: 100%; height: 40%"></div>
+			<div class="ui stacked segment">
+				<div class="ui inverted dimmer">
+					<div class="ui text loader">请检查是否为LL1文法，或者输入是否有效，否则请联系我，谢谢合作</div>
+				</div>
+				<div id="parserTree" style="width: 100%; height: 40%"></div>
+			</div>
 			<div class="ui two column doubling stackable grid">
 				<!-- 输入串，文法 -->
 				<div class="row">
@@ -48,6 +53,9 @@
 					<!-- 分析表，first集合，follow集合 -->
 					<div class="six wide column" id="parseTable">
 						<div class="ui raised segment">
+							<div class="ui inverted dimmer">
+								<div class="ui text loader">请检查是否为LL1文法，或者输入是否有效，否则请联系我，谢谢合作</div>
+							</div>
 							<h4 class="ui horizontal divider header">
 								First & Follow
 							</h4>
@@ -66,6 +74,9 @@
 						</div>
 						<div class="row">
 							<div class="ui piled segment">
+								<div class="ui inverted dimmer">
+									<div class="ui text loader">请检查是否为LL1文法，或者输入是否有效，否则请联系我，谢谢合作</div>
+								</div>
 								<h4 class="ui horizontal divider header">
 									Parse Table
 								</h4>
@@ -84,6 +95,9 @@
 					<!-- 分析过程 -->
 					<div class="six wide column">
 						<div class="ui piled segment">
+							<div class="ui inverted dimmer">
+								<div class="ui text loader">请检查是否为LL1文法，或者输入是否有效，否则请联系我，谢谢合作</div>
+							</div>
 							<h4 class="ui horizontal divider header">
 								Parser
 							</h4>
@@ -162,6 +176,7 @@
 					success: function(res, status, jqxhr) {
 						// console.log(res);
 						// first and follow
+						$('.ui.dimmer').dimmer('hide');
 						var ff = '';
 						for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
 							var first = res['FIRST'][i];
@@ -223,8 +238,11 @@
 							$('#parserTree').css('height', $('svg').height())
 						});
 						$('.parserMaxh').css('max-height', $('#parseTable').height() - 50);
+					},
+					error: function() {
+						$('.ui.dimmer').dimmer('show');
 					}
-				})
+	 			})
 			}
 
 			/*
