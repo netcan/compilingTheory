@@ -12,7 +12,18 @@
 "Body": [ {"noTerminal": "S", "production": ["aA", "", "d", ""]}
 , {"noTerminal": "A", "production": ["@", "bAS", "@", "@"]}
 ] }, 
-"Parser": [ { "step": 0, "parseStack": "#S", "indataStack": "#", "production": ""}
-, { "step": 1, "parseStack": "ERROR", "indataStack": "ERROR", "production": "ERROR"}
+"Parser": [ { "step": 0, "parseStack": "#S", "indataStack": "ababd#", "production": ""}
+, { "step": 1, "parseStack": "#Aa", "indataStack": "ababd#", "production": "S->aA"}
+, { "step": 2, "parseStack": "#A", "indataStack": "babd#", "production": "match a"}
+, { "step": 3, "parseStack": "#SAb", "indataStack": "babd#", "production": "A->bAS"}
+, { "step": 4, "parseStack": "#SA", "indataStack": "abd#", "production": "match b"}
+, { "step": 5, "parseStack": "#S", "indataStack": "abd#", "production": "A->@"}
+, { "step": 6, "parseStack": "#Aa", "indataStack": "abd#", "production": "S->aA"}
+, { "step": 7, "parseStack": "#A", "indataStack": "bd#", "production": "match a"}
+, { "step": 8, "parseStack": "#SAb", "indataStack": "bd#", "production": "A->bAS"}
+, { "step": 9, "parseStack": "#SA", "indataStack": "d#", "production": "match b"}
+, { "step": 10, "parseStack": "#S", "indataStack": "d#", "production": "A->@"}
+, { "step": 11, "parseStack": "#d", "indataStack": "d#", "production": "S->d"}
+, { "step": 12, "parseStack": "#", "indataStack": "#", "production": "match d"}
 ]
 }

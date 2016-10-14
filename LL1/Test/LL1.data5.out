@@ -1,0 +1,28 @@
+{
+"VT": [ "a", "b", "c", "d", "p"], 
+"VN": [ "A", "B", "S"], 
+"FIRST": [
+ { "noTerminal": "S", "Terminal": [ "a", "b", "c", "d"] }
+,{ "noTerminal": "A", "Terminal": [ "a", "c"] }
+,{ "noTerminal": "B", "Terminal": [ "b", "d"] }], 
+"FOLLOW": [
+ { "noTerminal": "S", "Terminal": [ "#"] }
+,{ "noTerminal": "A", "Terminal": [ "p"] }
+,{ "noTerminal": "B", "Terminal": [ "p"] }], 
+"Table": {
+"Header": ["a", "b", "c", "d", "p", "#"], 
+"Body": [ {"noTerminal": "S", "production": ["Ap", "Bp", "Ap", "Bp", "", ""]}
+, {"noTerminal": "A", "production": ["a", "", "cA", "", "", ""]}
+, {"noTerminal": "B", "production": ["", "b", "", "dB", "", ""]}
+] }, 
+"Parser": [ { "step": 0, "parseStack": "#S", "indataStack": "ccap#", "production": ""}
+, { "step": 1, "parseStack": "#pA", "indataStack": "ccap#", "production": "S->Ap"}
+, { "step": 2, "parseStack": "#pAc", "indataStack": "ccap#", "production": "A->cA"}
+, { "step": 3, "parseStack": "#pA", "indataStack": "cap#", "production": "match c"}
+, { "step": 4, "parseStack": "#pAc", "indataStack": "cap#", "production": "A->cA"}
+, { "step": 5, "parseStack": "#pA", "indataStack": "ap#", "production": "match c"}
+, { "step": 6, "parseStack": "#pa", "indataStack": "ap#", "production": "A->a"}
+, { "step": 7, "parseStack": "#p", "indataStack": "p#", "production": "match a"}
+, { "step": 8, "parseStack": "#", "indataStack": "#", "production": "match p"}
+]
+}
