@@ -164,7 +164,8 @@ void LL1::build() {
 	parseTable(); // 预测分析表
 	info();
 	// 求完表后，将@替换为#
-	VT.erase(VT.find('@'));
+	if(VT.find('@') != VT.end())
+		VT.erase(VT.find('@'));
 	VT.insert('#');
 	tableInfo();
 
