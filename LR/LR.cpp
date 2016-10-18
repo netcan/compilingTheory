@@ -37,7 +37,7 @@ using namespace std;
 #define EXTENSION_NOTERMINAL '^'
 
 class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
-	friend class Proj;
+	friend class Item;
 	friend class LR;
 	private:
 		char noTerminal; // 产生式左部非终结符名字
@@ -49,11 +49,11 @@ class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
 		friend bool operator == (const Prod &a, char c) {
 			return a.noTerminal == c;
 		}
+
+	public:
 		static string cut(const string &in, int i, int j) {
 			return string(in.begin() + i, in.begin() + j);
 		}
-
-	public:
 		void display();
 		Prod(const string &in);
 		Prod(char noTerminal, string selection, set<char> additionalVt):
@@ -75,7 +75,7 @@ Prod::Prod(const string &in) {
 }
 
 
-class Proj {
+class Item { // 项目集
 	friend class LR;
 	private:
 		vector<Prod> prods; // 项目集
@@ -85,11 +85,11 @@ class Proj {
 		void add(const string &prod);
 };
 
-set<char>Proj::Vn; // 全局静态变量
-set<char>Proj::Vt;
+set<char>Item::Vn; // 全局静态变量
+set<char>Item::Vt;
 
 
-void Proj::add(const string &prod) {
+void Item::add(const string &prod) {
 	if(prod.length() < 4) return;
 	char noTerminal;
 	if(Prod::cut(prod, 1, 3) == "->" && (isupper(prod[0]) || prod[0] == EXTENSION_NOTERMINAL)) // A->...则noTerminal = A
@@ -115,15 +115,15 @@ void Proj::add(const string &prod) {
 
 class LR {
 	private:
-		Proj G; // 文法G
-		vector<Proj> I; // 项目集
+		Item G; // 文法G
+		vector<Item> C; // 项目集集合
 		map<pair<int, char>, int> edge; // 边，项目<int, int>=char
 		map<char, set<char> > FIRST; // first集
 		set<char> first(const string &s); // 求first集
-		Proj closure(Proj I); // 求该项目的闭包
+		Item closure(Item I); // 求该项目的闭包
+		void items(); // 求项目集状态机DFA！!
 	public:
 		void add(const string &s); // 添加产生式
-		void buildProjs(); // 状态机！
 		void debug();
 };
 
@@ -131,7 +131,7 @@ void LR::add(const string &s) {
 	G.add(s);
 }
 
-Proj LR::closure(Proj I) {
+Item LR::closure(Item I) {
 	unsigned int size = 0;
 	while(size != I.prods.size()) { // 当没有项目加入的时候
 		size = I.prods.size();
@@ -167,6 +167,13 @@ Proj LR::closure(Proj I) {
 	return I;
 }
 
+void LR::items() {// 求项目集状态机DFA！!
+	Item initial;
+	initial.prods.push_back(Prod('^', '.' + string(1, G.prods[0].noTerminal), {'#'})); // 初值，^->.S,#
+	C.push_back(closure(initial)); // 置C初值
+
+}
+
 set<char> LR::first(const string &s) { // s不为产生式！
 	if(s.length() == 0)
 		return set<char>({'@'});
@@ -199,8 +206,6 @@ set<char> LR::first(const string &s) { // s不为产生式！
 	}
 }
 
-void LR::buildProjs() {// 状态机！
-}
 
 void LR::debug() {
 	puts("=====Proj:======");
@@ -217,8 +222,8 @@ void LR::debug() {
 	// for(auto c: f)
 		// printf("%c, ", c);
 	puts("");
-	// puts("\n=====Proj:======");
-	// Proj I;
+	// puts("\n=====Item:======");
+	// Item I;
 	// I.prods.push_back(Prod('B', "b.B", {'b', 'a'}));
 	// I = closure(I);
 	// for(auto prod: I.prods)
