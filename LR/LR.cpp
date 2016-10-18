@@ -41,10 +41,10 @@ class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
 	friend class LR;
 	private:
 		char noTerminal; // 产生式左部非终结符名字
-		string selection; // 产生式右部
+		string right; // 产生式右部
 		set<char> additionalVt; // 附加终结符
 		friend bool operator == (const Prod &a, const Prod &b) {
-			return a.noTerminal == b.noTerminal && a.selection == b.selection;
+			return a.noTerminal == b.noTerminal && a.right == b.right;
 		}
 		friend bool operator == (const Prod &a, char c) {
 			return a.noTerminal == c;
@@ -54,16 +54,16 @@ class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
 		static string cut(const string &in, int i, int j) {
 			return string(in.begin() + i, in.begin() + j);
 		}
-		void display();
+		void display() const;
 		Prod(const string &in);
-		Prod(char noTerminal, string selection, set<char> additionalVt):
-			noTerminal(noTerminal), selection(selection), additionalVt(additionalVt) {}
+		Prod(const char &noTerminal, const string& right, const set<char>& additionalVt):
+			noTerminal(noTerminal), right(right), additionalVt(additionalVt) {}
 };
 
-void Prod::display() {
-	printf("%c->%s", noTerminal, selection.c_str());
+void Prod::display() const{
+	printf("%c->%s", noTerminal, right.c_str());
 	int i = 0;
-	for(auto c:additionalVt)
+	for(const auto& c:additionalVt)
 		printf("%c%c", i++==0?',':'/', c);
 	puts("");
 }
@@ -71,7 +71,7 @@ void Prod::display() {
 Prod::Prod(const string &in) {
 	// printf("%s\n", in.c_str());
 	noTerminal = in[0];
-	selection = cut(in, 3, in.length());
+	right = cut(in, 3, in.length()); // A->X1X2X3X4
 }
 
 
@@ -81,25 +81,49 @@ class Item { // 项目集
 		vector<Prod> prods; // 项目集
 		static set<char> Vn; // 非终结符
 		static set<char> Vt; // 终结符
+		static set<char> Symbol; // 所有符号
+		friend bool operator == (const Item &a, const Item &b) {
+			if(a.prods.size() != b.prods.size()) return false;
+			else {
+				for(const auto& p: a.prods) {// 选择a的每个产生式
+					auto it = find(b.prods.begin(), b.prods.end(), p);
+					if(it == b.prods.end())  // 找不到
+						return false;
+					else  {// 找到的话判断附加终结符是否都相等
+						if(p.additionalVt != it->additionalVt)
+							return false;
+					}
+				}
+				return true;
+			}
+		}
 	public:
 		void add(const string &prod);
+		void display() const;
 };
 
 set<char>Item::Vn; // 全局静态变量
 set<char>Item::Vt;
+set<char>Item::Symbol;
 
 
 void Item::add(const string &prod) {
 	if(prod.length() < 4) return;
 	char noTerminal;
-	if(Prod::cut(prod, 1, 3) == "->" && (isupper(prod[0]) || prod[0] == EXTENSION_NOTERMINAL)) // A->...则noTerminal = A
+	if(Prod::cut(prod, 1, 3) == "->" && (isupper(prod[0]))) // A->...则noTerminal = A
 		noTerminal = prod[0];
 	else return;
 
 	for(unsigned int i=0; i<prod.length(); ++i) { // 提取终结符、非终结符
 		char c = prod[i];
-		if(isupper(c) || c == EXTENSION_NOTERMINAL) Vn.insert(c);
-		else if(c!='|' && !(c=='-' && prod[i+1] == '>' && ++i)) Vt.insert(c);
+		if(isupper(c)) {
+			Vn.insert(c);
+			Symbol.insert(c);
+		}
+		else if(c!='|' && !(c=='-' && prod[i+1] == '>' && ++i)) {
+			Vt.insert(c);
+			Symbol.insert(c);
+		}
 	}
 
 	for(unsigned int i=3; i<prod.length(); ++i) { // 提取候选式
@@ -112,19 +136,41 @@ void Item::add(const string &prod) {
 	}
 }
 
+void Item::display() const {
+	for(const auto& prod: prods)
+		prod.display();
+}
+
 
 class LR {
 	private:
 		Item G; // 文法G
+		enum actionStat{
+			ACCEPT=0,
+			SHIFTIN,
+			RECURSIVE,
+		};
+		static const char *actionStatStr[];
+
 		vector<Item> C; // 项目集规范族
 		map<pair<int, char>, int> GOTO; // goto数组，项目集<int, int>=char
+		map<pair<int, char>, pair<actionStat, int> > ACTION; // Action数组，Action[(i, a)]=(s|r)j
 		map<char, set<char> > FIRST; // first集
 		set<char> first(const string &s); // 求first集
 		Item closure(Item I); // 求该项目的闭包
+		Item Goto(const Item& I, char X); // 求I经过X到达的项目集
 		void items(); // 求项目集状态机DFA！!
 	public:
 		void add(const string &s); // 添加产生式
+		void build(); // 构造Action、GOTO表
+		void showTable(); // 打印LR分析表！
 		void debug();
+};
+
+const char*LR::actionStatStr[] = {
+	"acc",
+	"s",
+	"r"
 };
 
 void LR::add(const string &s) {
@@ -132,26 +178,28 @@ void LR::add(const string &s) {
 }
 
 Item LR::closure(Item I) {
+	if(I.prods.size() == 0) return I;
 	unsigned int size = 0;
 	while(size != I.prods.size()) { // 当没有项目加入的时候
 		size = I.prods.size();
-		for(auto prod: I.prods) { // 枚举I的产生式
+		for(const auto &prod: I.prods) { // 枚举I的产生式
 			unsigned long pointLoc = 0;
-			if((pointLoc = prod.selection.find('.')) != string::npos && pointLoc != prod.selection.length() - 1) { // 找到.，A->a.Bc,d
-				string f = Prod::cut(prod.selection, pointLoc+2, prod.selection.length());
+			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
+				if(G.Vt.find(prod.right[pointLoc + 1]) != G.Vt.end()) continue;
+				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 				// prod.display();
 				// printf("f: %s\n", f.c_str());
 				set<char> fst;
-				for(auto c: prod.additionalVt) {
+				for(const auto& c: prod.additionalVt) {
 					set<char> fs = first(f + c);
 					fst.insert(fs.begin(), fs.end());
 				}
 
 
 				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it) {
-					if(*it == prod.selection[pointLoc + 1]) { // 找到产生式
+					if(*it == prod.right[pointLoc + 1]) { // 找到产生式
 						Prod p = *it;
-						p.selection = '.' + p.selection;
+						p.right = '.' + p.right;
 						vector<Prod>::iterator Iit = find(I.prods.begin(), I.prods.end(), p); // 找I中是否存在产生式
 						if(Iit != I.prods.end())  // 找到
 							Iit->additionalVt.insert(fst.begin(), fst.end());
@@ -167,11 +215,130 @@ Item LR::closure(Item I) {
 	return I;
 }
 
+Item LR::Goto(const Item& I, char X) {
+	Item J;
+	if(I.prods.size() == 0) return J;
+
+	for(const auto& p: I.prods)  {// I中的每个项目
+		string right = p.right;
+		unsigned long pointLoc = right.find('.');
+		if(right[pointLoc + 1] == X) {
+			swap(right[pointLoc], right[pointLoc + 1]);
+			J.prods.push_back(Prod(p.noTerminal, right, p.additionalVt));
+		}
+	}
+	return closure(J);
+}
+
 void LR::items() {// 求项目集状态机DFA！!
 	Item initial;
-	initial.prods.push_back(Prod('^', '.' + string(1, G.prods[0].noTerminal), {'#'})); // 初值，^->.S,#
+	initial.prods.push_back(Prod(EXTENSION_NOTERMINAL, '.' + string(1, G.prods[0].noTerminal), {'#'})); // 初值，^->.S,#
 	C.push_back(closure(initial)); // 置C初值
+	size_t size = 0;
+	while(size != C.size()) { // 当没有项目集加入C中
+		size = C.size();
+		// for(auto &I: C) { // C的每个项目集，这样写有坑！！
+		for(unsigned int i=0; i<C.size(); ++i) { // C的每个项目集
+			Item I = C[i];
+			for(const auto &X: G.Symbol) { // 每个文法Vt符号X
+				Item next = Goto(I, X);
+				if(next.prods.size() != 0) { // 不为空
+					auto it = find(C.begin(), C.end(), next);
+					if(it != C.end()) { // 找到
+						GOTO[make_pair(i, X)] = it - C.begin();
+					} else {
+						C.push_back(next);
+						GOTO[make_pair(i, X)] = C.size()-1;
+					}
+				}
+			}
+		}
+	}
+	// printf("size: %ld\n", C.size());
+	// for(auto Item: C) {
+		// puts("=====");
+		// Item.display();
+	// }
+}
 
+void LR::build() { // 构造Action、GOTO表
+	items();
+	for(unsigned int i=0; i<C.size(); ++i) { // 逐个项目集
+		const Item & item = C[i];
+		for(const auto& prod: item.prods) { // 逐个项目
+			unsigned long pointLoc = prod.right.find('.');
+			if(pointLoc < prod.right.length() - 1) { // 不是最后一个
+				char X = prod.right[pointLoc + 1];
+				if(G.Vt.find(X) != G.Vt.end() && GOTO.find(make_pair(i, X)) != GOTO.end()) { // 终结符
+					int j = GOTO[make_pair(i, X)];
+					ACTION[make_pair(i, X)] = make_pair(SHIFTIN, j);
+				}
+			} else {
+				if(prod == Prod(EXTENSION_NOTERMINAL, string(1, G.prods[0].noTerminal)+'.', {}) && prod.additionalVt == set<char>({'#'}))  // S'->S.,# acction[i, #] = acc
+					ACTION[make_pair(i, '#')] = make_pair(ACCEPT, 0);
+				else if(prod.noTerminal != EXTENSION_NOTERMINAL){
+					string right = prod.right;
+					right.erase(pointLoc, 1); // 删除.
+					for(const auto& X: prod.additionalVt) { // A->a.,b，枚举b
+						vector<Prod>::iterator it = find(G.prods.begin(), G.prods.end(), Prod(prod.noTerminal, right, set<char>{}));
+						if(it != G.prods.end())  // 找到了
+							ACTION[make_pair(i, X)] = make_pair(RECURSIVE, it - G.prods.begin());
+					}
+				}
+			}
+		}
+	}
+	if(G.Vt.find('@') != G.Vt.end()) { // 删除@，移进#
+		G.Vt.erase(G.Vt.find('@'));
+		G.Symbol.erase(G.Symbol.find('@'));
+	}
+	G.Vt.insert('#');
+	G.Symbol.insert('#');
+}
+
+void LR::showTable() {
+	printf("\t");
+	for(const auto & X: G.Vt) {
+		if(X != '#')
+			printf("%c\t", X);
+	}
+	printf("%c\t", '#'); // #放到最后一列显示，美观
+
+	for(const auto & X: G.Vn)
+		printf("%c\t", X);
+	puts("");
+	for(unsigned int i=0; i<C.size(); ++i) {
+		printf("%d\t", i);
+		for(const auto & X: G.Vt) {
+			if(X != '#') {
+				pair<int, char> p = make_pair(i, X);
+				if(ACTION.find(p) != ACTION.end()) {
+					pair<actionStat, int> res = ACTION[p];
+					printf("%s", actionStatStr[res.first]);
+					if(res.first != ACCEPT)
+						printf("%d", res.second);
+				}
+				printf("\t");
+			}
+		}
+
+		pair<int, char> p = make_pair(i, '#');
+		if(ACTION.find(p) != ACTION.end()) {
+			pair<actionStat, int> res = ACTION[p];
+			printf("%s", actionStatStr[res.first]);
+			if(res.first != ACCEPT)
+				printf("%d", res.second);
+		}
+		printf("\t");
+
+		for(const auto & X: G.Vn) {
+			pair<int, char> p = make_pair(i, X);
+			if(GOTO.find(p) != GOTO.end())
+				printf("%d", GOTO[make_pair(i, X)]);
+			printf("\t");
+		}
+		puts("");
+	}
 }
 
 set<char> LR::first(const string &s) { // s不为产生式！
@@ -185,7 +352,7 @@ set<char> LR::first(const string &s) { // s不为产生式！
 			else {
 				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it)
 					if(it->noTerminal == s[0]) {
-						set<char> f = first(it->selection);
+						set<char> f = first(it->right);
 						FIRST[s[0]].insert(f.begin(), f.end());
 					}
 				return FIRST[s[0]];
@@ -210,7 +377,7 @@ set<char> LR::first(const string &s) { // s不为产生式！
 void LR::debug() {
 	puts("=====Proj:======");
 	for(auto pro: G.prods)
-		printf("%s\n", (string(1, pro.noTerminal) + "->" + pro.selection).c_str());
+		printf("%s\n", (string(1, pro.noTerminal) + "->" + pro.right).c_str());
 	puts("=====Vt:======");
 	for(auto vt: G.Vt)
 		printf("%c, ", vt);
@@ -228,6 +395,8 @@ void LR::debug() {
 	// I = closure(I);
 	// for(auto prod: I.prods)
 		// prod.display();
+	build();
+	showTable();
 }
 
 
