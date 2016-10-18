@@ -26,10 +26,10 @@ Step	statusStack	parseStack	inStrStack	action
 0	0				ccap#		SHIFTIN
 1	06		c		cap#		SHIFTIN
 2	066		cc		ap#		SHIFTIN
-3	0664		cca		p#		Recursive A->a
-4	06610		ccA		p#		Recursive A->cA
-5	0610		cA		p#		Recursive A->cA
+3	0664		cca		p#		REDUCE A->a
+4	06610		ccA		p#		REDUCE A->cA
+5	0610		cA		p#		REDUCE A->cA
 6	01		A		p#		SHIFTIN
-7	018		Ap		#		Recursive S->Ap
+7	018		Ap		#		REDUCE S->Ap
 8	03		S		#		ACCEPT
 

@@ -25,14 +25,14 @@ E, S, V,
 13				r2				
 Step	statusStack	parseStack	inStrStack	action
 0	0				i=*i#		SHIFTIN
-1	05		i		=*i#		Recursive V->i
+1	05		i		=*i#		REDUCE V->i
 2	04		V		=*i#		SHIFTIN
 3	048		V=		*i#		SHIFTIN
 4	0489		V=*		i#		SHIFTIN
-5	048912		V=*i		#		Recursive V->i
-6	048911		V=*V		#		Recursive E->V
-7	048913		V=*E		#		Recursive V->*E
-8	04811		V=V		#		Recursive E->V
-9	04810		V=E		#		Recursive S->V=E
+5	048912		V=*i		#		REDUCE V->i
+6	048911		V=*V		#		REDUCE E->V
+7	048913		V=*E		#		REDUCE V->*E
+8	04811		V=V		#		REDUCE E->V
+9	04810		V=E		#		REDUCE S->V=E
 10	03		S		#		ACCEPT
 

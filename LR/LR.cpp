@@ -148,7 +148,7 @@ class LR {
 		enum actionStat{
 			ACCEPT=0,
 			SHIFTIN,
-			RECURSIVE,
+			REDUCE,
 		};
 		static const char *actionStatStr[];
 
@@ -233,7 +233,7 @@ void LR::parser() {
 			status.push_back(act.second);
 			parse.push_back(inStr[iTop]);
 			inStr.pop_back();
-		} else if(act.first == RECURSIVE){
+		} else if(act.first == REDUCE){
 			Prod p = G.prods[act.second];
 
 			showStatusStack();
@@ -242,7 +242,7 @@ void LR::parser() {
 			printf("\t\t");
 			showStrStack();
 			printf("\t\t");
-			printf("Recursive %c->%s", p.noTerminal, p.right.c_str());
+			printf("REDUCE %c->%s", p.noTerminal, p.right.c_str());
 
 			for(unsigned i=0; i<p.right.size(); ++i) {
 				status.pop_back();
@@ -381,7 +381,7 @@ void LR::build() { // 构造Action、GOTO表
 					for(const auto& X: prod.additionalVt) { // A->a.,b，枚举b
 						vector<Prod>::iterator it = find(G.prods.begin(), G.prods.end(), Prod(prod.noTerminal, right, set<char>{}));
 						if(it != G.prods.end())  // 找到了
-							ACTION[make_pair(i, X)] = make_pair(RECURSIVE, it - G.prods.begin());
+							ACTION[make_pair(i, X)] = make_pair(REDUCE, it - G.prods.begin());
 					}
 				}
 			}

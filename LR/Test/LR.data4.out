@@ -48,9 +48,9 @@ A, B, E, F, T,
 33		r1										
 Step	statusStack	parseStack	inStrStack	action
 0	0				i*(i+i)+i#		SHIFTIN
-1	05		i		*(i+i)+i#		Recursive F->i
+1	05		i		*(i+i)+i#		REDUCE F->i
 2	03		F		*(i+i)+i#		SHIFTIN
 3	0311		F*		(i+i)+i#		SHIFTIN
 4	03111		F*(		i+i)+i#		SHIFTIN
-5	0311110		F*(i		+i)+i#		Recursive F->i
+5	0311110		F*(i		+i)+i#		REDUCE F->i
 6	031118		F*(F		+i)+i#		ERROR

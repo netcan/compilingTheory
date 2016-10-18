@@ -32,11 +32,11 @@ Step	statusStack	parseStack	inStrStack	action
 1	02		p		ccadd#		SHIFTIN
 2	026		pc		cadd#		SHIFTIN
 3	02612		pcc		add#		SHIFTIN
-4	0261211		pcca		dd#		Recursive A->a
+4	0261211		pcca		dd#		REDUCE A->a
 5	0261215		pccA		dd#		SHIFTIN
-6	026121516		pccAd		d#		Recursive A->cAd
+6	026121516		pccAd		d#		REDUCE A->cAd
 7	02610		pcA		d#		SHIFTIN
-8	0261014		pcAd		#		Recursive A->cAd
-9	024		pA		#		Recursive S->pA
+8	0261014		pcAd		#		REDUCE A->cAd
+9	024		pA		#		REDUCE S->pA
 10	01		S		#		ACCEPT
 
