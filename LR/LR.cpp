@@ -116,8 +116,8 @@ void Item::add(const string &prod) {
 class LR {
 	private:
 		Item G; // 文法G
-		vector<Item> C; // 项目集集合
-		map<pair<int, char>, int> edge; // 边，项目<int, int>=char
+		vector<Item> C; // 项目集规范族
+		map<pair<int, char>, int> GOTO; // goto数组，项目集<int, int>=char
 		map<char, set<char> > FIRST; // first集
 		set<char> first(const string &s); // 求first集
 		Item closure(Item I); // 求该项目的闭包
