@@ -1,0 +1,37 @@
+=====Proj:======
+S->BB
+B->bB
+B->a
+=====Vt:======
+a, b, 
+=====Vn:======
+B, S, 
+	a	b	#	B	S	
+0	s3	s4		1	2	
+1	s6	s7		5		
+2			acc			
+3	r2	r2				
+4	s3	s4		8		
+5			r0			
+6			r2			
+7	s6	s7		9		
+8	r1	r1				
+9			r1			
+Step	statusStack	parseStack	inStrStack	action
+0	0				bbabbba#		SHIFTIN
+1	04		b		babbba#		SHIFTIN
+2	044		bb		abbba#		SHIFTIN
+3	0443		bba		bbba#		Recursive B->a
+4	0448		bbB		bbba#		Recursive B->bB
+5	048		bB		bbba#		Recursive B->bB
+6	01		B		bbba#		SHIFTIN
+7	017		Bb		bba#		SHIFTIN
+8	0177		Bbb		ba#		SHIFTIN
+9	01777		Bbbb		a#		SHIFTIN
+10	017776		Bbbba		#		Recursive B->a
+11	017779		BbbbB		#		Recursive B->bB
+12	01779		BbbB		#		Recursive B->bB
+13	0179		BbB		#		Recursive B->bB
+14	015		BB		#		Recursive S->BB
+15	02		S		#		ACCEPT
+

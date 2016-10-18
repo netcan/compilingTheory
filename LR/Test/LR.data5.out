@@ -1,0 +1,30 @@
+=====Proj:======
+S->aA
+S->d
+A->bAS
+A->@
+=====Vt:======
+@, a, b, d, 
+=====Vn:======
+A, S, 
+	a	b	d	#	A	S	
+0	s2		s3			1	
+1				acc			
+2		s6			5		
+3				r1			
+4				r3			
+5				r0			
+6		s9			8		
+7	r3		r3				
+8	s2		s3			10	
+9		s9			11		
+10				r2			
+11	s13		s14			12	
+12	r2		r2				
+13		s9			15		
+14	r1		r1				
+15	r0		r0				
+Step	statusStack	parseStack	inStrStack	action
+0	0				ababd#		SHIFTIN
+1	02		a		babd#		SHIFTIN
+2	026		ab		abd#		ERROR

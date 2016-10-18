@@ -1,0 +1,50 @@
+=====Proj:======
+E->E+T
+E->T
+T->T*F
+T->F
+F->(E)
+F->i
+=====Vt:======
+(, ), *, +, i, 
+=====Vn:======
+E, F, T, 
+	(	)	*	+	i	#	E	F	T	
+0	s1				s5		2	3	4	
+1	s6				s10		7	8	9	
+2				s11		acc				
+3			r3	r3		r3				
+4			s12	r1		r1				
+5			r5	r5		r5				
+6	s6				s10		13	8	9	
+7		s14		s15						
+8		r3	r3	r3						
+9		r1	s16	r1						
+10		r5	r5	r5						
+11	s1				s5			3	17	
+12	s1				s5			18		
+13		s19		s15						
+14			r4	r4		r4				
+15	s6				s10			8	20	
+16	s6				s10			21		
+17			s12	r0		r0				
+18			r2	r2		r2				
+19		r4	r4	r4						
+20		r0	s16	r0						
+21		r2	r2	r2						
+Step	statusStack	parseStack	inStrStack	action
+0	0				i*i+i#		SHIFTIN
+1	05		i		*i+i#		Recursive F->i
+2	03		F		*i+i#		Recursive T->F
+3	04		T		*i+i#		SHIFTIN
+4	0412		T*		i+i#		SHIFTIN
+5	04125		T*i		+i#		Recursive F->i
+6	041218		T*F		+i#		Recursive T->T*F
+7	04		T		+i#		Recursive E->T
+8	02		E		+i#		SHIFTIN
+9	0211		E+		i#		SHIFTIN
+10	02115		E+i		#		Recursive F->i
+11	02113		E+F		#		Recursive T->F
+12	021117		E+T		#		Recursive E->E+T
+13	02		E		#		ACCEPT
+

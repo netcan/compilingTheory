@@ -1,0 +1,35 @@
+=====Proj:======
+S->Ap
+S->Bp
+A->a
+A->cA
+B->b
+B->dB
+=====Vt:======
+a, b, c, d, p, 
+=====Vn:======
+A, B, S, 
+	a	b	c	d	p	#	A	B	S	
+0	s4	s5	s6	s7			1	2	3	
+1					s8					
+2					s9					
+3						acc				
+4					r2					
+5					r4					
+6	s4		s6				10			
+7		s5		s7				11		
+8						r0				
+9						r1				
+10					r3					
+11					r5					
+Step	statusStack	parseStack	inStrStack	action
+0	0				ccap#		SHIFTIN
+1	06		c		cap#		SHIFTIN
+2	066		cc		ap#		SHIFTIN
+3	0664		cca		p#		Recursive A->a
+4	06610		ccA		p#		Recursive A->cA
+5	0610		cA		p#		Recursive A->cA
+6	01		A		p#		SHIFTIN
+7	018		Ap		#		Recursive S->Ap
+8	03		S		#		ACCEPT
+

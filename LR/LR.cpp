@@ -157,14 +157,22 @@ class LR {
 		map<pair<int, char>, pair<actionStat, int> > ACTION; // Action数组，Action[(i, a)]=(s|r)j
 		map<char, set<char> > FIRST; // first集
 		set<char> first(const string &s); // 求first集
+		vector<char> inStr; // 输入串/栈
+		vector<int> status; // 状态栈
+		vector<char> parse; // 分析栈
 		Item closure(Item I); // 求该项目的闭包
 		Item Goto(const Item& I, char X); // 求I经过X到达的项目集
 		void items(); // 求项目集状态机DFA！!
+		void showStrStack(); // 显示输入栈
+		void showStatusStack();
+		void showParseStack();
 	public:
 		void add(const string &s); // 添加产生式
 		void build(); // 构造Action、GOTO表
 		void showTable(); // 打印LR分析表！
 		void debug();
+		void loadStr(const string &in); // 读取输入串
+		void parser(); // LR(1)分析
 };
 
 const char*LR::actionStatStr[] = {
@@ -177,6 +185,96 @@ void LR::add(const string &s) {
 	G.add(s);
 }
 
+void LR::loadStr(const string &in) {
+	inStr.push_back('#');
+	status.push_back(0);
+	for(int i = in.length() - 1; i>=0; --i)
+		inStr.push_back(in[i]);
+}
+
+void LR::showStrStack() {
+	for(vector<char>::reverse_iterator it = inStr.rbegin(); it != inStr.rend(); ++it)
+		printf("%c", *it);
+}
+
+
+void LR::showStatusStack() {
+	for(vector<int>::iterator it = status.begin(); it != status.end(); ++it)
+		printf("%d", *it);
+}
+
+void LR::showParseStack() {
+	for(vector<char>::iterator it = parse.begin(); it != parse.end(); ++it)
+		printf("%c", *it);
+}
+
+void LR::parser() {
+	puts("Step\tstatusStack\tparseStack\tinStrStack\taction");
+	bool success = false;
+	int step = 0;
+	while(! success) {
+		printf("%d\t", step);
+
+		int sTop = status.size() - 1; // 栈顶
+		int iTop = inStr.size() - 1;
+		pair<int, char> p = make_pair(status[sTop], inStr[iTop]);
+		if(ACTION.find(p) == ACTION.end())  // 出错！
+			break;
+	 	pair<actionStat, int> act = ACTION[p];
+		if(act.first == SHIFTIN) { // 移进
+			showStatusStack();
+			printf("\t\t");
+			showParseStack();
+			printf("\t\t");
+			showStrStack();
+			printf("\t\t");
+			printf("SHIFTIN");
+
+			status.push_back(act.second);
+			parse.push_back(inStr[iTop]);
+			inStr.pop_back();
+		} else if(act.first == RECURSIVE){
+			Prod p = G.prods[act.second];
+
+			showStatusStack();
+			printf("\t\t");
+			showParseStack();
+			printf("\t\t");
+			showStrStack();
+			printf("\t\t");
+			printf("Recursive %c->%s", p.noTerminal, p.right.c_str());
+
+			for(unsigned i=0; i<p.right.size(); ++i) {
+				status.pop_back();
+				parse.pop_back();
+			}
+			parse.push_back(p.noTerminal);
+			status.push_back(GOTO[make_pair(status[status.size() - 1], p.noTerminal)]);
+		} else if(act.first == ACCEPT) {
+			success = true;
+
+			showStatusStack();
+			printf("\t\t");
+			showParseStack();
+			printf("\t\t");
+			showStrStack();
+			printf("\t\t");
+			printf("ACCEPT");
+		}
+		puts("");
+		++step;
+	}
+	if(! success) {
+		showStatusStack();
+		printf("\t\t");
+		showParseStack();
+		printf("\t\t");
+		showStrStack();
+		printf("\t\t");
+		printf("ERROR");
+	}
+}
+
 Item LR::closure(Item I) {
 	if(I.prods.size() == 0) return I;
 	unsigned int size = 0;
@@ -186,6 +284,7 @@ Item LR::closure(Item I) {
 			unsigned long pointLoc = 0;
 			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
 				if(G.Vt.find(prod.right[pointLoc + 1]) != G.Vt.end()) continue;
+
 				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 				// prod.display();
 				// printf("f: %s\n", f.c_str());
@@ -397,6 +496,8 @@ void LR::debug() {
 		// prod.display();
 	build();
 	showTable();
+	parser();
+	puts("");
 }
 
 
@@ -406,6 +507,9 @@ int main() {
 	LR lr;
 	while(cin >> in && in != "#")
 		lr.add(in);
+	in = "";
+	cin >> in;
+	lr.loadStr(in);
 	lr.debug();
 
 	return 0;
