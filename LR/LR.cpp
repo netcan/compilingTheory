@@ -109,6 +109,12 @@ void LR::parser() {
 	int step = 0;
 	while(! success) {
 		printf("%d\t", step);
+		showStatusStack();
+		printf("\t\t");
+		showParseStack();
+		printf("\t\t");
+		showStrStack();
+		printf("\t\t");
 
 		int sTop = status.size() - 1; // 栈顶
 		int iTop = inStr.size() - 1;
@@ -117,12 +123,6 @@ void LR::parser() {
 			break;
 	 	pair<actionStat, int> act = ACTION[p];
 		if(act.first == SHIFT) { // 移进
-			showStatusStack();
-			printf("\t\t");
-			showParseStack();
-			printf("\t\t");
-			showStrStack();
-			printf("\t\t");
 			printf("SHIFT");
 
 			status.push_back(act.second);
@@ -130,44 +130,25 @@ void LR::parser() {
 			inStr.pop_back();
 		} else if(act.first == REDUCE){
 			Prod p = G.prods[act.second];
-
-			showStatusStack();
-			printf("\t\t");
-			showParseStack();
-			printf("\t\t");
-			showStrStack();
-			printf("\t\t");
 			printf("REDUCE %c->%s", p.noTerminal, p.right.c_str());
 
-			for(unsigned i=0; i<p.right.size(); ++i) {
-				status.pop_back();
-				parse.pop_back();
-			}
+			if(p.right != "@") // 空串，无需出栈，直接规约
+				for(unsigned i=0; i<p.right.size(); ++i) {
+					status.pop_back();
+					parse.pop_back();
+				}
 			parse.push_back(p.noTerminal);
 			status.push_back(GOTO[make_pair(status[status.size() - 1], p.noTerminal)]);
 		} else if(act.first == ACCEPT) {
 			success = true;
 
-			showStatusStack();
-			printf("\t\t");
-			showParseStack();
-			printf("\t\t");
-			showStrStack();
-			printf("\t\t");
 			printf("ACCEPT");
 		}
 		puts("");
 		++step;
 	}
-	if(! success) {
-		showStatusStack();
-		printf("\t\t");
-		showParseStack();
-		printf("\t\t");
-		showStrStack();
-		printf("\t\t");
-		printf("ERROR");
-	}
+	if(! success)
+		printf("ERROR\n");
 }
 
 Item LR::closure(Item I) {
@@ -175,11 +156,15 @@ Item LR::closure(Item I) {
 	unsigned int size = 0;
 	while(size != I.prods.size()) { // 当没有项目加入的时候
 		size = I.prods.size();
-		for(const auto &prod: I.prods) { // 枚举I的产生式
+		for(auto &prod: I.prods) { // 枚举I的产生式
 			unsigned long pointLoc = 0;
 			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
 				char X = prod.right[pointLoc + 1];
-				if(G.Vt.find(X) != G.Vt.end()) continue;
+				if(G.Vt.find(X) != G.Vt.end()) {
+					if(X == '@')
+						swap(prod.right[pointLoc], prod.right[pointLoc + 1]);
+					continue;
+				}
 
 				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 				// prod.display();
@@ -213,7 +198,7 @@ Item LR::closure(Item I) {
 
 Item LR::Goto(const Item& I, char X) {
 	Item J;
-	if(I.prods.size() == 0) return J;
+	if(I.prods.size() == 0 || X == '@') return J; // 项目集为空或者@则返回空项目
 
 	for(const auto& p: I.prods)  {// I中的每个项目
 		string right = p.right;
@@ -435,8 +420,8 @@ void LR::run() {
 
 	build();
 	showTable();
+
 	parser();
-	puts("");
 }
 
 int main() {

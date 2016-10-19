@@ -1,0 +1,61 @@
+	(	)	*	+	-	/	i	#	E	F	G	S	T	
+0	s1						s5		2	3			4	
+1	s6						s10		7	8			9	
+2								acc						
+3			s11	r7	r7	s12		r7				13		
+4				s14	s15			r3			16			
+5			r9	r9	r9	r9		r9						
+6	s6						s10		17	8			9	
+7		s18												
+8		r7	s19	r7	r7	s20						21		
+9		r3		s22	s23						24			
+10		r9	r9	r9	r9	r9								
+11	s1						s5			25				
+12	s1						s5			26				
+13				r4	r4			r4						
+14	s1						s5			3			27	
+15	s1						s5			3			28	
+16								r0						
+17		s29												
+18			r8	r8	r8	r8		r8						
+19	s6						s10			30				
+20	s6						s10			31				
+21		r4		r4	r4									
+22	s6						s10			8			32	
+23	s6						s10			8			33	
+24		r0												
+25			s11	r7	r7	s12		r7				34		
+26			s11	r7	r7	s12		r7				35		
+27				s14	s15			r3			36			
+28				s14	s15			r3			37			
+29		r8	r8	r8	r8	r8								
+30		r7	s19	r7	r7	s20						38		
+31		r7	s19	r7	r7	s20						39		
+32		r3		s22	s23						40			
+33		r3		s22	s23						41			
+34				r5	r5			r5						
+35				r6	r6			r6						
+36								r1						
+37								r2						
+38		r5		r5	r5									
+39		r6		r6	r6									
+40		r1												
+41		r2												
+Step	statusStack	parseStack	inStrStack	action
+0	0				i+i*i#		SHIFT
+1	05		i		+i*i#		REDUCE F->i
+2	03		F		+i*i#		REDUCE S->@
+3	0313		FS		+i*i#		REDUCE T->FS
+4	04		T		+i*i#		SHIFT
+5	0414		T+		i*i#		SHIFT
+6	04145		T+i		*i#		REDUCE F->i
+7	04143		T+F		*i#		SHIFT
+8	0414311		T+F*		i#		SHIFT
+9	04143115		T+F*i		#		REDUCE F->i
+10	041431125		T+F*F		#		REDUCE S->@
+11	04143112534		T+F*FS		#		REDUCE S->*FS
+12	0414313		T+FS		#		REDUCE T->FS
+13	041427		T+T		#		REDUCE G->@
+14	04142736		T+TG		#		REDUCE G->+TG
+15	0416		TG		#		REDUCE E->TG
+16	02		E		#		ACCEPT

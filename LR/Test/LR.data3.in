@@ -1,6 +1,0 @@
-G->S
-S->S+P|P
-P->P*V|V
-V->i
-#
-i+i*i+i

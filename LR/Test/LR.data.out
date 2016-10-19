@@ -22,18 +22,17 @@
 20		r0	s16	r0						
 21		r2	r2	r2						
 Step	statusStack	parseStack	inStrStack	action
-0	0				i*i+i#		SHIFT
-1	05		i		*i+i#		REDUCE F->i
-2	03		F		*i+i#		REDUCE T->F
-3	04		T		*i+i#		SHIFT
-4	0412		T*		i+i#		SHIFT
-5	04125		T*i		+i#		REDUCE F->i
-6	041218		T*F		+i#		REDUCE T->T*F
-7	04		T		+i#		REDUCE E->T
-8	02		E		+i#		SHIFT
-9	0211		E+		i#		SHIFT
-10	02115		E+i		#		REDUCE F->i
-11	02113		E+F		#		REDUCE T->F
+0	0				i+i*i#		SHIFT
+1	05		i		+i*i#		REDUCE F->i
+2	03		F		+i*i#		REDUCE T->F
+3	04		T		+i*i#		REDUCE E->T
+4	02		E		+i*i#		SHIFT
+5	0211		E+		i*i#		SHIFT
+6	02115		E+i		*i#		REDUCE F->i
+7	02113		E+F		*i#		REDUCE T->F
+8	021117		E+T		*i#		SHIFT
+9	02111712		E+T*		i#		SHIFT
+10	021117125		E+T*i		#		REDUCE F->i
+11	0211171218		E+T*F		#		REDUCE T->T*F
 12	021117		E+T		#		REDUCE E->E+T
 13	02		E		#		ACCEPT
-

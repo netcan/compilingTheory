@@ -1,0 +1,10 @@
+E->TG
+G->+TG|-TG
+G->@
+T->FS
+S->*FS|/FS
+S->@
+F->(E)
+F->i
+#
+i+i*i
