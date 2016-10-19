@@ -127,6 +127,7 @@ class LR {
 		void debug();
 		void loadStr(const string &in); // 读取输入串
 		void parser(); // LR(1)分析
+		void showGrammar(); // 显示输入的文法产生式
 		void run();
 };
 

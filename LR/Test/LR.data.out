@@ -1,38 +1,46 @@
-	(	)	*	+	i	#	E	F	T	
-0	s1				s5		2	3	4	
-1	s6				s10		7	8	9	
-2				s11		acc				
-3			r3	r3		r3				
-4			s12	r1		r1				
-5			r5	r5		r5				
-6	s6				s10		13	8	9	
-7		s14		s15						
-8		r3	r3	r3						
-9		r1	s16	r1						
-10		r5	r5	r5						
-11	s1				s5			3	17	
-12	s1				s5			18		
-13		s19		s15						
-14			r4	r4		r4				
-15	s6				s10			8	20	
-16	s6				s10			21		
-17			s12	r0		r0				
-18			r2	r2		r2				
-19		r4	r4	r4						
-20		r0	s16	r0						
-21		r2	r2	r2						
-Step	statusStack	parseStack	inStrStack	action
-0	0				i+i*i#		SHIFT
-1	05		i		+i*i#		REDUCE F->i
-2	03		F		+i*i#		REDUCE T->F
-3	04		T		+i*i#		REDUCE E->T
-4	02		E		+i*i#		SHIFT
-5	0211		E+		i*i#		SHIFT
-6	02115		E+i		*i#		REDUCE F->i
-7	02113		E+F		*i#		REDUCE T->F
-8	021117		E+T		*i#		SHIFT
-9	02111712		E+T*		i#		SHIFT
-10	021117125		E+T*i		#		REDUCE F->i
-11	0211171218		E+T*F		#		REDUCE T->T*F
-12	021117		E+T		#		REDUCE E->E+T
-13	02		E		#		ACCEPT
+{"Grammar": [
+ "E->E+T", "E->T", "T->T*F", "T->F", "F->(E)", "F->i"
+]
+,"parseTable": {
+"Vt": ["(", ")", "*", "+", "i", "#"],
+"Vn": [ "E", "F", "T"],
+"Body": [
+ [ "s1", "", "", "", "s5", "", 2, 3, 4]
+, [ "s6", "", "", "", "s10", "", 7, 8, 9]
+, [ "", "", "", "s11", "", "acc", "", "", ""]
+, [ "", "", "r3", "r3", "", "r3", "", "", ""]
+, [ "", "", "s12", "r1", "", "r1", "", "", ""]
+, [ "", "", "r5", "r5", "", "r5", "", "", ""]
+, [ "s6", "", "", "", "s10", "", 13, 8, 9]
+, [ "", "s14", "", "s15", "", "", "", "", ""]
+, [ "", "r3", "r3", "r3", "", "", "", "", ""]
+, [ "", "r1", "s16", "r1", "", "", "", "", ""]
+, [ "", "r5", "r5", "r5", "", "", "", "", ""]
+, [ "s1", "", "", "", "s5", "", "", 3, 17]
+, [ "s1", "", "", "", "s5", "", "", 18, ""]
+, [ "", "s19", "", "s15", "", "", "", "", ""]
+, [ "", "", "r4", "r4", "", "r4", "", "", ""]
+, [ "s6", "", "", "", "s10", "", "", 8, 20]
+, [ "s6", "", "", "", "s10", "", "", 21, ""]
+, [ "", "", "s12", "r0", "", "r0", "", "", ""]
+, [ "", "", "r2", "r2", "", "r2", "", "", ""]
+, [ "", "r4", "r4", "r4", "", "", "", "", ""]
+, [ "", "r0", "s16", "r0", "", "", "", "", ""]
+, [ "", "r2", "r2", "r2", "", "", "", "", ""]
+]}
+,"parser": [
+{"statusStack": "0", "parseStack": "", "inStrStack": "i+i*i#", "action": "SHIFT"}
+, {"statusStack": "05", "parseStack": "i", "inStrStack": "+i*i#", "action": "REDUCE F->i"}
+, {"statusStack": "03", "parseStack": "F", "inStrStack": "+i*i#", "action": "REDUCE T->F"}
+, {"statusStack": "04", "parseStack": "T", "inStrStack": "+i*i#", "action": "REDUCE E->T"}
+, {"statusStack": "02", "parseStack": "E", "inStrStack": "+i*i#", "action": "SHIFT"}
+, {"statusStack": "0211", "parseStack": "E+", "inStrStack": "i*i#", "action": "SHIFT"}
+, {"statusStack": "02115", "parseStack": "E+i", "inStrStack": "*i#", "action": "REDUCE F->i"}
+, {"statusStack": "02113", "parseStack": "E+F", "inStrStack": "*i#", "action": "REDUCE T->F"}
+, {"statusStack": "021117", "parseStack": "E+T", "inStrStack": "*i#", "action": "SHIFT"}
+, {"statusStack": "02111712", "parseStack": "E+T*", "inStrStack": "i#", "action": "SHIFT"}
+, {"statusStack": "021117125", "parseStack": "E+T*i", "inStrStack": "#", "action": "REDUCE F->i"}
+, {"statusStack": "0211171218", "parseStack": "E+T*F", "inStrStack": "#", "action": "REDUCE T->T*F"}
+, {"statusStack": "021117", "parseStack": "E+T", "inStrStack": "#", "action": "REDUCE E->E+T"}
+, {"statusStack": "02", "parseStack": "E", "inStrStack": "#", "action": "ACCEPT"}]
+}

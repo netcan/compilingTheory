@@ -104,17 +104,20 @@ void LR::showParseStack() {
 }
 
 void LR::parser() {
-	puts("Step\tstatusStack\tparseStack\tinStrStack\taction");
+	printf("\"parser\": [");
+
 	bool success = false;
 	int step = 0;
 	while(! success) {
-		printf("%d\t", step);
+		// printf("%d\t", step);
+		printf("%s{", step == 0?"\n":"\n, ");
+		printf("\"statusStack\": \"");
 		showStatusStack();
-		printf("\t\t");
+		printf("\", \"parseStack\": \"");
 		showParseStack();
-		printf("\t\t");
+		printf("\", \"inStrStack\": \"");
 		showStrStack();
-		printf("\t\t");
+		printf("\", \"action\": ");
 
 		int sTop = status.size() - 1; // 栈顶
 		int iTop = inStr.size() - 1;
@@ -123,14 +126,14 @@ void LR::parser() {
 			break;
 	 	pair<actionStat, int> act = ACTION[p];
 		if(act.first == SHIFT) { // 移进
-			printf("SHIFT");
+			printf("\"SHIFT\"}");
 
 			status.push_back(act.second);
 			parse.push_back(inStr[iTop]);
 			inStr.pop_back();
 		} else if(act.first == REDUCE){
 			Prod p = G.prods[act.second];
-			printf("REDUCE %c->%s", p.noTerminal, p.right.c_str());
+			printf("\"REDUCE %c->%s\"}", p.noTerminal, p.right.c_str());
 
 			if(p.right != "@") // 空串，无需出栈，直接规约
 				for(unsigned i=0; i<p.right.size(); ++i) {
@@ -141,14 +144,14 @@ void LR::parser() {
 			status.push_back(GOTO[make_pair(status[status.size() - 1], p.noTerminal)]);
 		} else if(act.first == ACCEPT) {
 			success = true;
-
-			printf("ACCEPT");
+			printf("\"ACCEPT\"}");
 		}
-		puts("");
 		++step;
 	}
 	if(! success)
-		printf("ERROR\n");
+		printf("\"ERROR\"}\n");
+
+	printf("]\n");
 }
 
 Item LR::closure(Item I) {
@@ -279,48 +282,55 @@ void LR::build() { // 构造Action、GOTO表
 }
 
 void LR::showTable() {
-	printf("\t");
+	printf("\"parseTable\": {\n");
+	printf("\"Vt\": [");
+
 	for(const auto & X: G.Vt) {
 		if(X != '#')
-			printf("%c\t", X);
+			printf("\"%c\", ", X);
 	}
-	printf("%c\t", '#'); // #放到最后一列显示，美观
+	printf("\"%c\"", '#'); // #放到最后一列显示，美观
+	printf("],\n\"Vn\": [");
 
+	int firstComma = 0; // 处理第一个逗号
 	for(const auto & X: G.Vn)
-		printf("%c\t", X);
-	puts("");
+		printf("%s\"%c\"", firstComma++ == 0?" ":", ",X);
+	printf("],\n\"Body\": [\n");
+
 	for(unsigned int i=0; i<C.size(); ++i) {
-		printf("%d\t", i);
+		printf("%s[", i == 0?" ":", ");
+		int firstComma = 0;
 		for(const auto & X: G.Vt) {
 			if(X != '#') {
 				pair<int, char> p = make_pair(i, X);
 				if(ACTION.find(p) != ACTION.end()) {
 					pair<actionStat, int> res = ACTION[p];
-					printf("%s", actionStatStr[res.first]);
-					if(res.first != ACCEPT)
-						printf("%d", res.second);
+					printf("%s\"%s%d\"", firstComma++ == 0?" ":", ", actionStatStr[res.first], res.second);
 				}
-				printf("\t");
+				else printf("%s\"\"", firstComma++ == 0?" ":", ");
 			}
 		}
 
 		pair<int, char> p = make_pair(i, '#');
 		if(ACTION.find(p) != ACTION.end()) {
 			pair<actionStat, int> res = ACTION[p];
-			printf("%s", actionStatStr[res.first]);
+			printf("%s\"%s", firstComma++ == 0?" ":", ", actionStatStr[res.first]);
 			if(res.first != ACCEPT)
-				printf("%d", res.second);
+				printf("%d\"", res.second);
+			else printf("\"");
 		}
-		printf("\t");
+		else printf("%s\"\"", firstComma++ == 0?" ":", ");
 
 		for(const auto & X: G.Vn) {
 			pair<int, char> p = make_pair(i, X);
 			if(GOTO.find(p) != GOTO.end())
-				printf("%d", GOTO[make_pair(i, X)]);
-			printf("\t");
+				printf("%s%d", firstComma++ == 0?" ":", ", GOTO[make_pair(i, X)]);
+			else printf("%s\"\"", firstComma++ == 0?" ":", ");
 		}
-		puts("");
+		puts("]");
 	}
+
+	printf("]}\n");
 }
 
 set<char> LR::first(const string &s) { // s不为产生式！
@@ -409,6 +419,12 @@ void LR::debug() {
 	puts("");
 }
 
+void LR::showGrammar() {
+	printf("\"Grammar\": [\n");
+	for(const auto & p: G.prods)
+		printf("%s\"%c->%s\"", (&p - &G.prods[0]) == 0?" ":", ", p.noTerminal, p.right.c_str());
+	printf("\n]\n");
+}
 
 void LR::run() {
 	string in;
@@ -418,10 +434,17 @@ void LR::run() {
 	cin >> in;
 	loadStr(in);
 
+
+	printf("{");
+	showGrammar();
+	printf(",");
+
 	build();
 	showTable();
+	printf(",");
 
 	parser();
+	printf("}\n");
 }
 
 int main() {
