@@ -1,7 +1,6 @@
-E->TA
-A->+TA|@
-T->FB
-B->*FB|@
-F->(E)|i
+E->E*B
+E->E+B
+E->B
+B->0|1
 #
-i*(i+i)+i
+1+1

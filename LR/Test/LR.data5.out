@@ -1,30 +1,28 @@
-=====Proj:======
-S->aA
-S->d
-A->bAS
-A->@
-=====Vt:======
-@, a, b, d, 
-=====Vn:======
-A, S, 
-	a	b	d	#	A	S	
-0	s2		s3			1	
-1				acc			
-2		s6			5		
-3				r1			
-4				r3			
-5				r0			
-6		s9			8		
-7	r3		r3				
-8	s2		s3			10	
-9		s9			11		
-10				r2			
-11	s13		s14			12	
-12	r2		r2				
-13		s9			15		
-14	r1		r1				
-15	r0		r0				
+	*	=	i	#	E	S	V	
+0	s1		s5		2	3	4	
+1	s1		s5		6		7	
+2				r1				
+3				acc				
+4		s8		r4				
+5		r3		r3				
+6		r2		r2				
+7		r4		r4				
+8	s9		s12		10		11	
+9	s9		s12		13		11	
+10				r0				
+11				r4				
+12				r3				
+13				r2				
 Step	statusStack	parseStack	inStrStack	action
-0	0				ababd#		SHIFTIN
-1	02		a		babd#		SHIFTIN
-2	026		ab		abd#		ERROR
+0	0				i=*i#		SHIFT
+1	05		i		=*i#		REDUCE V->i
+2	04		V		=*i#		SHIFT
+3	048		V=		*i#		SHIFT
+4	0489		V=*		i#		SHIFT
+5	048912		V=*i		#		REDUCE V->i
+6	048911		V=*V		#		REDUCE E->V
+7	048913		V=*E		#		REDUCE V->*E
+8	04811		V=V		#		REDUCE E->V
+9	04810		V=E		#		REDUCE S->V=E
+10	03		S		#		ACCEPT
+

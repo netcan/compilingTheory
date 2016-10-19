@@ -1,11 +1,3 @@
-=====Proj:======
-S->BB
-B->bB
-B->a
-=====Vt:======
-a, b, 
-=====Vn:======
-B, S, 
 	a	b	#	B	S	
 0	s3	s4		1	2	
 1	s6	s7		5		
@@ -18,16 +10,16 @@ B, S,
 8	r1	r1				
 9			r1			
 Step	statusStack	parseStack	inStrStack	action
-0	0				bbabbba#		SHIFTIN
-1	04		b		babbba#		SHIFTIN
-2	044		bb		abbba#		SHIFTIN
+0	0				bbabbba#		SHIFT
+1	04		b		babbba#		SHIFT
+2	044		bb		abbba#		SHIFT
 3	0443		bba		bbba#		REDUCE B->a
 4	0448		bbB		bbba#		REDUCE B->bB
 5	048		bB		bbba#		REDUCE B->bB
-6	01		B		bbba#		SHIFTIN
-7	017		Bb		bba#		SHIFTIN
-8	0177		Bbb		ba#		SHIFTIN
-9	01777		Bbbb		a#		SHIFTIN
+6	01		B		bbba#		SHIFT
+7	017		Bb		bba#		SHIFT
+8	0177		Bbb		ba#		SHIFT
+9	01777		Bbbb		a#		SHIFT
 10	017776		Bbbba		#		REDUCE B->a
 11	017779		BbbbB		#		REDUCE B->bB
 12	01779		BbbB		#		REDUCE B->bB

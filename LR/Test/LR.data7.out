@@ -1,14 +1,3 @@
-=====Proj:======
-S->Ap
-S->Bp
-A->a
-A->cA
-B->b
-B->dB
-=====Vt:======
-a, b, c, d, p, 
-=====Vn:======
-A, B, S, 
 	a	b	c	d	p	#	A	B	S	
 0	s4	s5	s6	s7			1	2	3	
 1					s8					
@@ -23,13 +12,13 @@ A, B, S,
 10					r3					
 11					r5					
 Step	statusStack	parseStack	inStrStack	action
-0	0				ccap#		SHIFTIN
-1	06		c		cap#		SHIFTIN
-2	066		cc		ap#		SHIFTIN
+0	0				ccap#		SHIFT
+1	06		c		cap#		SHIFT
+2	066		cc		ap#		SHIFT
 3	0664		cca		p#		REDUCE A->a
 4	06610		ccA		p#		REDUCE A->cA
 5	0610		cA		p#		REDUCE A->cA
-6	01		A		p#		SHIFTIN
+6	01		A		p#		SHIFT
 7	018		Ap		#		REDUCE S->Ap
 8	03		S		#		ACCEPT
 

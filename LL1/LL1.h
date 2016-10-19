@@ -26,6 +26,9 @@
 						神兽保佑，代码无BUG!
 *************************************************************************/
 
+#ifndef LL1_H
+#define LL1_H
+
 #include <iostream>
 #include <ctype.h>
 #include <vector>
@@ -81,3 +84,5 @@ class LL1 {
 		void error(int step); // 错误处理
 		void run(); // 运行LL1
 };
+
+#endif

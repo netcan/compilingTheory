@@ -1,66 +1,33 @@
-=====Proj:======
-E->TG
-G->+TG
-G->-TG
-G->@
-T->FS
-S->*FS
-S->/FS
-S->@
-F->(E)
-F->i
-=====Vt:======
-(, ), *, +, -, /, @, i, 
-=====Vn:======
-E, F, G, S, T, 
-	(	)	*	+	-	/	i	#	E	F	G	S	T	
-0	s1						s5		2	3			4	
-1	s6						s10		7	8			9	
-2								acc						
-3			s11			s12						14		
-4				s15	s16						18			
-5			r9	r9	r9	r9		r9						
-6	s6						s10		19	8			9	
-7		s20												
-8			s21			s22						24		
-9				s25	s26						28			
-10		r9	r9	r9	r9	r9								
-11	s1						s5			29				
-12	s1						s5			30				
-13				r7	r7			r7						
-14				r4	r4			r4						
-15	s1						s5			3			31	
-16	s1						s5			3			32	
-17								r3						
-18								r0						
-19		s33												
-20			r8	r8	r8	r8		r8						
-21	s6						s10			34				
-22	s6						s10			35				
-23		r7		r7	r7									
-24		r4		r4	r4									
-25	s6						s10			8			36	
-26	s6						s10			8			37	
-27		r3												
-28		r0												
-29			s11			s12						38		
-30			s11			s12						39		
-31				s15	s16						40			
-32				s15	s16						41			
-33		r8	r8	r8	r8	r8								
-34			s21			s22						42		
-35			s21			s22						43		
-36				s25	s26						44			
-37				s25	s26						45			
-38				r5	r5			r5						
-39				r6	r6			r6						
-40								r1						
-41								r2						
-42		r5		r5	r5									
-43		r6		r6	r6									
-44		r1												
-45		r2												
+	*	+	i	#	G	P	S	V	
+0			s5		1	2	3	4	
+1				acc					
+2	s6	r2		r2					
+3		s7		r0					
+4	r4	r4		r4					
+5	r5	r5		r5					
+6			s5					8	
+7			s5			9		4	
+8	r3	r3		r3					
+9	s6	r1		r1					
 Step	statusStack	parseStack	inStrStack	action
-0	0				i+i*i#		SHIFTIN
-1	05		i		+i*i#		REDUCE F->i
-2	03		F		+i*i#		ERROR
+0	0				i+i*i+i#		SHIFT
+1	05		i		+i*i+i#		REDUCE V->i
+2	04		V		+i*i+i#		REDUCE P->V
+3	02		P		+i*i+i#		REDUCE S->P
+4	03		S		+i*i+i#		SHIFT
+5	037		S+		i*i+i#		SHIFT
+6	0375		S+i		*i+i#		REDUCE V->i
+7	0374		S+V		*i+i#		REDUCE P->V
+8	0379		S+P		*i+i#		SHIFT
+9	03796		S+P*		i+i#		SHIFT
+10	037965		S+P*i		+i#		REDUCE V->i
+11	037968		S+P*V		+i#		REDUCE P->P*V
+12	0379		S+P		+i#		REDUCE S->S+P
+13	03		S		+i#		SHIFT
+14	037		S+		i#		SHIFT
+15	0375		S+i		#		REDUCE V->i
+16	0374		S+V		#		REDUCE P->V
+17	0379		S+P		#		REDUCE S->S+P
+18	03		S		#		REDUCE G->S
+19	01		G		#		ACCEPT
+

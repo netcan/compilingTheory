@@ -26,39 +26,7 @@
 						神兽保佑，代码无BUG!
  ************************************************************************/
 
-#include <iostream>
-#include <ctype.h>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <map>
-#include <set>
-using namespace std;
-#define EXTENSION_NOTERMINAL '^'
-
-class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
-	friend class Item;
-	friend class LR;
-	private:
-		char noTerminal; // 产生式左部非终结符名字
-		string right; // 产生式右部
-		set<char> additionalVt; // 附加终结符
-		friend bool operator == (const Prod &a, const Prod &b) {
-			return a.noTerminal == b.noTerminal && a.right == b.right;
-		}
-		friend bool operator == (const Prod &a, char c) {
-			return a.noTerminal == c;
-		}
-
-	public:
-		static string cut(const string &in, int i, int j) {
-			return string(in.begin() + i, in.begin() + j);
-		}
-		void display() const;
-		Prod(const string &in);
-		Prod(const char &noTerminal, const string& right, const set<char>& additionalVt):
-			noTerminal(noTerminal), right(right), additionalVt(additionalVt) {}
-};
+#include "LR.h"
 
 void Prod::display() const{
 	printf("%c->%s", noTerminal, right.c_str());
@@ -73,39 +41,6 @@ Prod::Prod(const string &in) {
 	noTerminal = in[0];
 	right = cut(in, 3, in.length()); // A->X1X2X3X4
 }
-
-
-class Item { // 项目集
-	friend class LR;
-	private:
-		vector<Prod> prods; // 项目集
-		static set<char> Vn; // 非终结符
-		static set<char> Vt; // 终结符
-		static set<char> Symbol; // 所有符号
-		friend bool operator == (const Item &a, const Item &b) {
-			if(a.prods.size() != b.prods.size()) return false;
-			else {
-				for(const auto& p: a.prods) {// 选择a的每个产生式
-					auto it = find(b.prods.begin(), b.prods.end(), p);
-					if(it == b.prods.end())  // 找不到
-						return false;
-					else  {// 找到的话判断附加终结符是否都相等
-						if(p.additionalVt != it->additionalVt)
-							return false;
-					}
-				}
-				return true;
-			}
-		}
-	public:
-		void add(const string &prod);
-		void display() const;
-};
-
-set<char>Item::Vn; // 全局静态变量
-set<char>Item::Vt;
-set<char>Item::Symbol;
-
 
 void Item::add(const string &prod) {
 	if(prod.length() < 4) return;
@@ -140,46 +75,6 @@ void Item::display() const {
 	for(const auto& prod: prods)
 		prod.display();
 }
-
-
-class LR {
-	private:
-		Item G; // 文法G
-		enum actionStat{
-			ACCEPT=0,
-			SHIFTIN,
-			REDUCE,
-		};
-		static const char *actionStatStr[];
-
-		vector<Item> C; // 项目集规范族
-		map<pair<int, char>, int> GOTO; // goto数组，项目集<int, int>=char
-		map<pair<int, char>, pair<actionStat, int> > ACTION; // Action数组，Action[(i, a)]=(s|r)j
-		map<char, set<char> > FIRST; // first集
-		set<char> first(const string &s); // 求first集
-		vector<char> inStr; // 输入串/栈
-		vector<int> status; // 状态栈
-		vector<char> parse; // 分析栈
-		Item closure(Item I); // 求该项目的闭包
-		Item Goto(const Item& I, char X); // 求I经过X到达的项目集
-		void items(); // 求项目集状态机DFA！!
-		void showStrStack(); // 显示输入栈
-		void showStatusStack();
-		void showParseStack();
-	public:
-		void add(const string &s); // 添加产生式
-		void build(); // 构造Action、GOTO表
-		void showTable(); // 打印LR分析表！
-		void debug();
-		void loadStr(const string &in); // 读取输入串
-		void parser(); // LR(1)分析
-};
-
-const char*LR::actionStatStr[] = {
-	"acc",
-	"s",
-	"r"
-};
 
 void LR::add(const string &s) {
 	G.add(s);
@@ -221,14 +116,14 @@ void LR::parser() {
 		if(ACTION.find(p) == ACTION.end())  // 出错！
 			break;
 	 	pair<actionStat, int> act = ACTION[p];
-		if(act.first == SHIFTIN) { // 移进
+		if(act.first == SHIFT) { // 移进
 			showStatusStack();
 			printf("\t\t");
 			showParseStack();
 			printf("\t\t");
 			showStrStack();
 			printf("\t\t");
-			printf("SHIFTIN");
+			printf("SHIFT");
 
 			status.push_back(act.second);
 			parse.push_back(inStr[iTop]);
@@ -283,27 +178,29 @@ Item LR::closure(Item I) {
 		for(const auto &prod: I.prods) { // 枚举I的产生式
 			unsigned long pointLoc = 0;
 			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
-				if(G.Vt.find(prod.right[pointLoc + 1]) != G.Vt.end()) continue;
+				char X = prod.right[pointLoc + 1];
+				if(G.Vt.find(X) != G.Vt.end() && X != '@') continue;
 
 				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 				// prod.display();
 				// printf("f: %s\n", f.c_str());
-				set<char> fst;
+				set<char> ff;
 				for(const auto& c: prod.additionalVt) {
 					set<char> fs = first(f + c);
-					fst.insert(fs.begin(), fs.end());
+					ff.insert(fs.begin(), fs.end());
 				}
-
+				// if(ff == set<char>{'#'} && prod.noTerminal != EXTENSION_NOTERMINAL)  // 只含#，那么把Follow集加进来
+					// ff.insert(FOLLOW[prod.noTerminal].begin(), FOLLOW[prod.noTerminal].end());
 
 				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it) {
-					if(*it == prod.right[pointLoc + 1]) { // 找到产生式
+					if(*it == X) { // 找到产生式
 						Prod p = *it;
 						p.right = '.' + p.right;
 						vector<Prod>::iterator Iit = find(I.prods.begin(), I.prods.end(), p); // 找I中是否存在产生式
 						if(Iit != I.prods.end())  // 找到
-							Iit->additionalVt.insert(fst.begin(), fst.end());
+							Iit->additionalVt.insert(ff.begin(), ff.end());
 						else {
-							p.additionalVt.insert(fst.begin(), fst.end());
+							p.additionalVt.insert(ff.begin(), ff.end());
 							I.prods.push_back(p);
 						}
 					}
@@ -354,13 +251,14 @@ void LR::items() {// 求项目集状态机DFA！!
 		}
 	}
 	// printf("size: %ld\n", C.size());
-	// for(auto Item: C) {
-		// puts("=====");
+	// for(const auto& Item: C) {
+		// printf("===%ld===\n", &Item - &C[0]);
 		// Item.display();
 	// }
 }
 
 void LR::build() { // 构造Action、GOTO表
+	follow();
 	items();
 	for(unsigned int i=0; i<C.size(); ++i) { // 逐个项目集
 		const Item & item = C[i];
@@ -370,12 +268,12 @@ void LR::build() { // 构造Action、GOTO表
 				char X = prod.right[pointLoc + 1];
 				if(G.Vt.find(X) != G.Vt.end() && GOTO.find(make_pair(i, X)) != GOTO.end()) { // 终结符
 					int j = GOTO[make_pair(i, X)];
-					ACTION[make_pair(i, X)] = make_pair(SHIFTIN, j);
+					ACTION[make_pair(i, X)] = make_pair(SHIFT, j);
 				}
 			} else {
 				if(prod == Prod(EXTENSION_NOTERMINAL, string(1, G.prods[0].noTerminal)+'.', {}) && prod.additionalVt == set<char>({'#'}))  // S'->S.,# acction[i, #] = acc
 					ACTION[make_pair(i, '#')] = make_pair(ACCEPT, 0);
-				else if(prod.noTerminal != EXTENSION_NOTERMINAL){
+				else if(prod.noTerminal != EXTENSION_NOTERMINAL) {
 					string right = prod.right;
 					right.erase(pointLoc, 1); // 删除.
 					for(const auto& X: prod.additionalVt) { // A->a.,b，枚举b
@@ -473,6 +371,32 @@ set<char> LR::first(const string &s) { // s不为产生式！
 }
 
 
+void LR::follow() {
+	FOLLOW[G.prods[0].noTerminal].insert('#'); // 开始符号放'#'
+	for(auto pp: G.prods) { // 直到follow(X)不在增大
+		unsigned int size = 0;
+		while(size != FOLLOW[pp.noTerminal].size()) {
+			size = FOLLOW[pp.noTerminal].size();
+			for(auto prod: G.prods) { // 求出所有非终结符的follow集合
+				char X = prod.noTerminal;
+				for(auto p: G.prods) {// 求出X的follow集合
+					string s = p.right;
+					unsigned long loc = 0;
+					if((loc = s.find(X)) != string::npos) { // 找到非终结符X
+						set<char> f = first(string(s.begin() + loc + 1, s.end())); // 求first(b)
+						FOLLOW[X].insert(f.begin(), f.end()); // 加入到follow(X)中
+						if(f.find('@') != f.end()) {// 找到@
+							FOLLOW[X].erase(FOLLOW[X].find('@')); // 删除@
+							set<char> fw = FOLLOW[p.noTerminal]; // 把follow(A)放入follow(X)
+							FOLLOW[X].insert(fw.begin(), fw.end());
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void LR::debug() {
 	puts("=====Proj:======");
 	for(auto pro: G.prods)
@@ -501,16 +425,23 @@ void LR::debug() {
 }
 
 
-
-int main() {
+void LR::run() {
 	string in;
-	LR lr;
 	while(cin >> in && in != "#")
-		lr.add(in);
+		add(in);
 	in = "";
 	cin >> in;
-	lr.loadStr(in);
-	lr.debug();
+	loadStr(in);
+
+	build();
+	showTable();
+	parser();
+	puts("");
+}
+
+int main() {
+	LR lr;
+	lr.run();
 
 	return 0;
 }

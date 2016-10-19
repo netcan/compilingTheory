@@ -1,56 +1,20 @@
-=====Proj:======
-E->TA
-A->+TA
-A->@
-T->FB
-B->*FB
-B->@
-F->(E)
-F->i
-=====Vt:======
-(, ), *, +, @, i, 
-=====Vn:======
-A, B, E, F, T, 
-	(	)	*	+	i	#	A	B	E	F	T	
-0	s1				s5				2	3	4	
-1	s6				s10				7	8	9	
-2						acc						
-3			s11					13				
-4				s14			16					
-5			r7	r7		r7						
-6	s6				s10				17	8	9	
-7		s18										
-8			s19					21				
-9				s22			24					
-10		r7	r7	r7								
-11	s1				s5					25		
-12				r5		r5						
-13				r3		r3						
-14	s1				s5					3	26	
-15						r2						
-16						r0						
-17		s27										
-18			r6	r6		r6						
-19	s6				s10					28		
-20		r5		r5								
-21		r3		r3								
-22	s6				s10					8	29	
-23		r2										
-24		r0										
-25			s11					30				
-26				s14			31					
-27		r6	r6	r6								
-28			s19					32				
-29				s22			33					
-30				r4		r4						
-31						r1						
-32		r4		r4								
-33		r1										
+	*	+	0	1	#	B	E	
+0			s1	s2		3	4	
+1	r3	r3			r3			
+2	r4	r4			r4			
+3	r2	r2			r2			
+4	s5	s6			acc			
+5			s1	s2		7		
+6			s1	s2		8		
+7	r0	r0			r0			
+8	r1	r1			r1			
 Step	statusStack	parseStack	inStrStack	action
-0	0				i*(i+i)+i#		SHIFTIN
-1	05		i		*(i+i)+i#		REDUCE F->i
-2	03		F		*(i+i)+i#		SHIFTIN
-3	0311		F*		(i+i)+i#		SHIFTIN
-4	03111		F*(		i+i)+i#		SHIFTIN
-5	0311110		F*(i		+i)+i#		REDUCE F->i
-6	031118		F*(F		+i)+i#		ERROR
+0	0				1+1#		SHIFT
+1	02		1		+1#		REDUCE B->1
+2	03		B		+1#		REDUCE E->B
+3	04		E		+1#		SHIFT
+4	046		E+		1#		SHIFT
+5	0462		E+1		#		REDUCE B->1
+6	0468		E+B		#		REDUCE E->E+B
+7	04		E		#		ACCEPT
+

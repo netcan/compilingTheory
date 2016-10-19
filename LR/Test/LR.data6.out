@@ -1,14 +1,3 @@
-=====Proj:======
-S->pA
-S->qB
-A->cAd
-A->a
-B->dB
-B->b
-=====Vt:======
-a, b, c, d, p, q, 
-=====Vn:======
-A, B, S, 
 	a	b	c	d	p	q	#	A	B	S	
 0					s2	s3				1	
 1							acc				
@@ -28,14 +17,14 @@ A, B, S,
 15				s16							
 16				r2							
 Step	statusStack	parseStack	inStrStack	action
-0	0				pccadd#		SHIFTIN
-1	02		p		ccadd#		SHIFTIN
-2	026		pc		cadd#		SHIFTIN
-3	02612		pcc		add#		SHIFTIN
+0	0				pccadd#		SHIFT
+1	02		p		ccadd#		SHIFT
+2	026		pc		cadd#		SHIFT
+3	02612		pcc		add#		SHIFT
 4	0261211		pcca		dd#		REDUCE A->a
-5	0261215		pccA		dd#		SHIFTIN
+5	0261215		pccA		dd#		SHIFT
 6	026121516		pccAd		d#		REDUCE A->cAd
-7	02610		pcA		d#		SHIFTIN
+7	02610		pcA		d#		SHIFT
 8	0261014		pcAd		#		REDUCE A->cAd
 9	024		pA		#		REDUCE S->pA
 10	01		S		#		ACCEPT

@@ -1,10 +1,6 @@
-E->TG
-G->+TG|-TG
-G->@
-T->FS
-S->*FS|/FS
-S->@
-F->(E)
-F->i
+G->S
+S->S+P|P
+P->P*V|V
+V->i
 #
-i+i*i
+i+i*i+i
