@@ -179,7 +179,7 @@ Item LR::closure(Item I) {
 			unsigned long pointLoc = 0;
 			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
 				char X = prod.right[pointLoc + 1];
-				if(G.Vt.find(X) != G.Vt.end() && X != '@') continue;
+				if(G.Vt.find(X) != G.Vt.end()) continue;
 
 				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 				// prod.display();
@@ -258,7 +258,7 @@ void LR::items() {// 求项目集状态机DFA！!
 }
 
 void LR::build() { // 构造Action、GOTO表
-	follow();
+	// follow();
 	items();
 	for(unsigned int i=0; i<C.size(); ++i) { // 逐个项目集
 		const Item & item = C[i];
