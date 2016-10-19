@@ -1,0 +1,227 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>LR(1) parser by netcan</title>
+		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+		<link href="../node_modules/semantic-ui-css/semantic.min.css" rel="stylesheet">
+		<link href="../node_modules/mermaid/dist/mermaid.forest.css" rel="stylesheet">
+
+		<style>
+			.node-name {
+				font-weight: bolder;
+			}
+			.parserMaxh {
+				display: block;
+				max-height: 550px;
+				overflow-y: auto;
+				overflow-x: hidden;
+			}
+			.underline {
+				text-decoration: underline;
+			}
+		</style>
+	</head>
+	<body>
+
+		<a href="https://github.com/netcan/compilingTheory" target="_blank">
+			<img style="position: fixed; top: 0; right: 0; border: 0; z-index: 901" src="../fork.png" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
+		</a>
+
+		<div class="ui container">
+			<h1 class="header">LR(1) parser by netcan</h1>
+
+			<!-- DFA图 -->
+			<div class="ui stacked segment">
+				<h4 class="ui horizontal divider header">
+					DFA Graph
+				</h4>
+				<button class="huge ui button fluid" id="graphButton">
+					Open DFA Graph on new window
+				</button>
+				<div id="Graph">
+				</div>
+			</div>
+
+			<div class="ui two column doubling stackable grid">
+				<!-- 输入串，文法 -->
+				<div class="four wide column">
+					<div class="ui stacked segment">
+						<div class="ui form">
+							<div class="field">
+								<label for="indata">输入串</label>
+								<input type="text" id="indata">
+							</div>
+							<div class="field">
+								<label for="grammar">输入文法</label>
+								<textarea id="grammar"></textarea>
+							</div>
+							<!-- <button class="small fluid ui submit button" type="submit" id="submit">LL1分析！</button> -->
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="ui piled segment">
+							<h4 class="ui horizontal divider header">
+								Grammar List
+							</h4>
+							<table class="ui selectable striped celled structured table">
+								<thead>
+									<tr class="center aligned">
+										<th class="one wide">ID</th>
+										<th>Production</th>
+									</tr>
+								</thead>
+								<tbody id="gmrb">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div class="twelve wide column">
+					<!-- LR分析表 -->
+					<div class="twelve wide column" id="parseTable">
+						<div class="ui piled segment">
+							<h4 class="ui horizontal divider header">
+								Parse Table
+							</h4>
+							<div class="parserMaxh">
+								<table class="ui selectable striped celled structured table">
+									<thead>
+										<tr id="pth1" class="center aligned">
+										</tr>
+										<tr id="pth2" class="center aligned">
+										</tr>
+									</thead>
+									<tbody id="ptb">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<!-- 分析过程 -->
+						<div class="twelve wide column">
+							<div class="ui piled segment">
+								<h4 class="ui horizontal divider header">
+									Parser
+								</h4>
+								<div class="parserMaxh">
+									<table class="ui stackable striped selectable celled table">
+										<thead>
+											<tr class="center aligned">
+												<th class="one wide">Step</th>
+												<th>statusStack</th>
+												<th>parseStack</th>
+												<th>inStrStack</th>
+												<th>action</th>
+											</tr>
+										</thead>
+										<tbody id="parser">
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="../node_modules/semantic-ui-css/semantic.min.js"></script>
+		<script src="../node_modules/mermaid/dist/mermaid.min.js"></script>
+		<script>
+			mermaid.initialize({
+				startOnLoad:true,
+				flowchart:{
+					useMaxWidth:false,
+					htmlLabels:true
+				}
+			});
+
+			function update() {
+				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
+				console.log(data);
+				$.ajax({
+					url: "LR.php",
+					datatype: "json",
+					method: "POST",
+					data: {"data": data},
+					success: function(res, status, jqxhr) {
+						console.log(res);
+						// DFA Graph
+						var graph = mermaidAPI.render(res['Graph']);
+						$('#Graph').html(graph);
+
+						// Gammar list
+						var gmrb = '';
+						for(var i=0, len=res["Grammar"].length; i<len; ++i)
+							gmrb += '<tr class="center aligned">' +
+								'<td>' + i + '</td>' +
+								'<td>' + res["Grammar"][i] + '</td>';
+
+						$('#gmrb').html(gmrb);
+
+						// parse Table
+						var pth1 = '<th rowspan="2" class="one wide">Status</th>'+
+							'<th colspan='+ res["parseTable"]["Vt"].length +'>ACTION</th>' +
+							'<th colspan='+ res["parseTable"]["Vn"].length +'>GOTO</th>';
+						var pth2 = '';
+						var ptb = '';
+						for(var i=0, len=res["parseTable"]["Vt"].length; i<len; ++i)
+							pth2 += '<th>' + res["parseTable"]["Vt"][i] + '</th>'
+						for(var i=0, len=res["parseTable"]["Vn"].length; i<len; ++i)
+							pth2 += '<th>' + res["parseTable"]["Vn"][i] + '</th>';
+
+						for(var i=0, len=res["parseTable"]["Body"].length; i<len; ++i) {
+							ptb += '<tr class="center aligned"><td>' + i + '</td>'
+							var row = res["parseTable"]["Body"][i];
+								for(var j=0, jlen=row.length; j<jlen; ++j)
+									ptb += '<td>' + row[j] + '</td>'
+										ptb += '</tr>';
+						}
+
+						$('#pth1').html(pth1);
+						$('#pth2').html(pth2);
+						$('#ptb').html(ptb);
+
+						// parser
+						var parser = '';
+						for(var i=0, len=res["parser"].length; i<len; ++i) {
+							var row = res["parser"][i];
+							parser += '<tr class="center aligned '+ (row["action"] == "ERROR"?"negative":"") +'">' +
+								'<td>'+ i +'</td>' +
+								'<td>'+ row["statusStack"] +'</td>' +
+								'<td>'+ row["parseStack"] +'</td>' +
+								'<td>'+ row["inStrStack"] +'</td>' +
+								'<td>'+ row["action"] +'</td>' +
+								'</tr>';
+						}
+						$('#parser').html(parser);
+					}
+				});
+			}
+
+			$("#indata").on("keyup paste", update);
+			$("#grammar").on("keyup paste", update);
+			$('#graphButton').click(function() {
+				var gw = window.open("", "DFA Graph", "width=800,height=600,scrollbars=1");
+				gw.document.write($('#Graph').html());
+			});
+
+			$(document).ready(function() {
+				$('#indata').val('i+i*i');
+				$('#grammar').val(
+						"E->E+T\n"+
+						"E->T\n"+
+						"T->T*F\n"+
+						"T->F\n"+
+						"F->(E)\n"+
+						"F->i"
+						);
+				update();
+			});
+		</script>
+	</body>
+</html>

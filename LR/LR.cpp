@@ -28,12 +28,12 @@
 
 #include "LR.h"
 
-void Prod::display() const{
-	printf("%c->%s", noTerminal, right.c_str());
+string Prod::displayStr() const{
+	string p = string(1, noTerminal) + "->" + right.c_str();
 	int i = 0;
 	for(const auto& c:additionalVt)
-		printf("%c%c", i++==0?',':'/', c);
-	puts("");
+		p += string(1, i++==0?',':'/') + c;
+	return p;
 }
 
 Prod::Prod(const string &in) {
@@ -73,7 +73,7 @@ void Item::add(const string &prod) {
 
 void Item::display() const {
 	for(const auto& prod: prods)
-		prod.display();
+		cout << prod.displayStr() << endl;
 }
 
 void LR::add(const string &s) {
@@ -94,8 +94,10 @@ void LR::showStrStack() {
 
 
 void LR::showStatusStack() {
-	for(vector<int>::iterator it = status.begin(); it != status.end(); ++it)
-		printf("%d", *it);
+	for(vector<int>::iterator it = status.begin(); it != status.end(); ++it) {
+		if(*it < 10) printf(" %d ", *it);
+		else printf(" <span class='underline'>%d</span> ", *it);
+	}
 }
 
 void LR::showParseStack() {
@@ -426,6 +428,46 @@ void LR::showGrammar() {
 	printf("\n]\n");
 }
 
+string Prod::replaceAll(const string &in, const string from, const string to) {
+	size_t replacePos = in.find(from);
+	string res = in;
+	if(replacePos != string::npos)
+		res.replace(replacePos, from.length(), to);
+	return res;
+}
+
+void LR::drawGraph() {
+	printf("\"Graph\": \"");
+	printf("graph BT;");
+	// 画节点
+	for(const auto &I: C) { // 列出项目集
+		int i = &I-&C[0];
+		printf("I%d(\\\"I%d <br>", i, i);
+		for(const auto &p: I.prods) { // 列出项目
+			string res = p.displayStr();
+			res = Prod::replaceAll(res, "(", "#40;");
+			res = Prod::replaceAll(res, "(", "#41;");
+			if(res.find('^') != string::npos)
+				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
+
+			printf("%s <br>", res.c_str());
+		}
+		printf("\\\");");
+	}
+
+	// 画边
+	for(const auto &link: GOTO) {
+		int i = link.first.first;
+		string X = string(1, link.first.second);
+		X = Prod::replaceAll(X, "(", "#40;");
+		X = Prod::replaceAll(X, ")", "#41;");
+
+		int j = link.second;
+		printf("I%d-->|\\\"%s\\\"|I%d;", i, X.c_str(), j);
+	}
+	printf("\"");
+}
+
 void LR::run() {
 	string in;
 	while(cin >> in && in != "#")
@@ -442,6 +484,9 @@ void LR::run() {
 	build();
 	showTable();
 	printf(",");
+
+	drawGraph();
+	printf(",\n");
 
 	parser();
 	printf("}\n");

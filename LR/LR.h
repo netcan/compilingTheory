@@ -57,7 +57,8 @@ class Prod { // 这里是存放形如X->abc的形式，不存在多个候选式
 		static string cut(const string &in, int i, int j) {
 			return string(in.begin() + i, in.begin() + j);
 		}
-		void display() const;
+		static string replaceAll(const string &in, const string from, const string to);
+		string displayStr() const;
 		Prod(const string &in);
 		Prod(const char &noTerminal, const string& right, const set<char>& additionalVt):
 			noTerminal(noTerminal), right(right), additionalVt(additionalVt) {}
@@ -128,6 +129,7 @@ class LR {
 		void loadStr(const string &in); // 读取输入串
 		void parser(); // LR(1)分析
 		void showGrammar(); // 显示输入的文法产生式
+		void drawGraph(); // 画出DFA！
 		void run();
 };
 
