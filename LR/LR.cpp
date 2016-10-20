@@ -32,7 +32,8 @@ string Prod::displayStr() const{
 	string p = string(1, noTerminal) + "->" + right.c_str();
 	int i = 0;
 	for(const auto& c:additionalVt)
-		p += string(1, i++==0?',':'/') + c;
+		if(c != '#') p += string(1, i++==0?',':'/') + c; // #放到最后显示
+	if(additionalVt.find('#') != additionalVt.end()) p += "/#";
 	return p;
 }
 
@@ -461,7 +462,7 @@ void LR::drawGraph() {
 		int i = link.first.first;
 		string X = string(1, link.first.second);
 		int j = link.second;
-		printf("I%d-->|\\\"%s\\\"|I%d;", i, X.c_str(), j);
+		printf("I%d-->|\\\" %s \\\"|I%d;", i, X.c_str(), j);
 	}
 	printf("\", \n");
 
@@ -476,7 +477,7 @@ void LR::drawGraph() {
 		int i = link.first.first;
 		string X = string(1, link.first.second);
 		int j = link.second;
-		printf("I%d-->|\\\"%s\\\"|I%d;", i, X.c_str(), j);
+		printf("I%d-->|\\\" %s \\\"|I%d;", i, X.c_str(), j);
 	}
 	// 附加信息
 	for(const auto &I: C) { // 列出项目集
