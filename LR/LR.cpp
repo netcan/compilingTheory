@@ -32,8 +32,8 @@ string Prod::displayStr() const{
 	string p = string(1, noTerminal) + "->" + right.c_str();
 	int i = 0;
 	for(const auto& c:additionalVt)
-		if(c != '#') p += string(1, i++==0?',':'/') + c; // #放到最后显示
-	if(additionalVt.find('#') != additionalVt.end()) p += string(1, i++==0?',':'/') + "#";
+		if(c != '#') p += string(1, i++==0?',':'|') + c; // #放到最后显示
+	if(additionalVt.find('#') != additionalVt.end()) p += string(1, i++==0?',':'|') + "#";
 	return p;
 }
 

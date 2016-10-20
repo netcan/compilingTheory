@@ -243,13 +243,15 @@
 			});
 
 			$(document).ready(function() {
-				$('#indata').val('i+i*i');
+				$('#indata').val('i*i+i*(i+i)*i-i+i/(i*i)*i');
 				$('#grammar').val(
-						"E->E+T\n"+
-						"E->T\n"+
-						"T->T*F\n"+
-						"T->F\n"+
-						"F->(E)\n"+
+						"E->TG\n" +
+						"G->+TG|-TG\n" +
+						"G->@\n" +
+						"T->FS\n" +
+						"S->*FS|/FS\n" +
+						"S->@\n" +
+						"F->(E)\n" +
 						"F->i"
 						);
 				update(false);
