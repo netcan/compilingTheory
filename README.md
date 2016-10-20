@@ -6,3 +6,6 @@
 
 ## LL1 Parser
 ![ll1.gif](ll1.gif)
+
+## LR1 Parser
+![LR.gif](LR.gif)
