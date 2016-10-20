@@ -33,7 +33,7 @@ string Prod::displayStr() const{
 	int i = 0;
 	for(const auto& c:additionalVt)
 		if(c != '#') p += string(1, i++==0?',':'/') + c; // #放到最后显示
-	if(additionalVt.find('#') != additionalVt.end()) p += "/#";
+	if(additionalVt.find('#') != additionalVt.end()) p += string(1, i++==0?',':'/') + "#";
 	return p;
 }
 
@@ -441,20 +441,20 @@ void LR::drawGraph() {
 	printf("\"Graph\": {");
 	// 图的全部信息
 	printf("\"All\": \"");
-	printf("graph TD;");
+	printf("digraph all{"
+			"node [shape=box style=filled];"
+		  );
 	// 画节点
-	for(const auto &I: C) { // 列出项目集
-		int i = &I-&C[0];
-		printf("I%d(\\\"<div>I(%d)</div> ", i, i);
+	for(const auto &I: C) { // 遍历项目集
+		int i = &I - &C[0];
+		printf("I%d[label=\\\"I%d\\n", i, i);
 		for(const auto &p: I.prods) { // 列出项目
-			printf("<div>");
 			string res = p.displayStr();
 			if(res.find('^') != string::npos)
 				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
-
-			printf("%s </div>", res.c_str());
+			printf("%s\\n", res.c_str());
 		}
-		printf("\\\");");
+		printf("\\\" ];\\n");
 	}
 
 	// 画边
@@ -462,38 +462,37 @@ void LR::drawGraph() {
 		int i = link.first.first;
 		string X = string(1, link.first.second);
 		int j = link.second;
-		printf("I%d-->|\\\" %s \\\"|I%d;", i, X.c_str(), j);
+		printf("I%d -> I%d[label=\\\"%s\\\"];", i, j, X.c_str());
 	}
-	printf("\", \n");
-
+	printf("}\", ");
 	// 图的简要信息
 	printf("\"Simple\": \"");
-	printf("graph TD;");
+	printf("digraph simple {"
+			"node [shape = circle style=filled];"
+		  );
 	// 画节点
-	for(size_t i=0; i<C.size(); ++i)
-		printf("I%ld((\\\"I(%ld)\\\"));", i, i);
+	for(const auto &I: C) { // 遍历项目集
+		int i = &I - &C[0];
+		printf("I%d[tooltip=\\\"I%d\\n", i, i);
+		for(const auto &p: I.prods) { // 列出项目
+			string res = p.displayStr();
+			if(res.find('^') != string::npos)
+				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
+			printf("%s\\n", res.c_str());
+		}
+		printf("\\\" ];\\n");
+	}
 	// 画边
 	for(const auto &link: GOTO) {
 		int i = link.first.first;
 		string X = string(1, link.first.second);
 		int j = link.second;
-		printf("I%d-->|\\\" %s \\\"|I%d;", i, X.c_str(), j);
-	}
-	// 附加信息
-	for(const auto &I: C) { // 列出项目集
-		int i = &I-&C[0];
-		printf("click I%d undefined \\\"", i);
-		for(const auto &p: I.prods) { // 列出项目
-			string res = p.displayStr();
-			if(res.find('^') != string::npos)
-				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
-
-			printf("<div>%s </div>", res.c_str());
-		}
-		printf("\\\";");
+		printf("I%d -> I%d[label=\\\"%s\\\"];", i, j, X.c_str());
 	}
 
-	printf("\"}");
+	printf("}\"");
+	printf("}");
+
 }
 
 void LR::run() {

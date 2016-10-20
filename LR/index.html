@@ -4,20 +4,26 @@
 		<title>LR(1) parser by netcan</title>
 		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 		<link href="../node_modules/semantic-ui-css/semantic.min.css" rel="stylesheet">
-		<link href="../node_modules/mermaid/dist/mermaid.css" rel="stylesheet">
 
 		<style>
 			.node-name {
 				font-weight: bolder;
 			}
-			.parserMaxh {
-				display: block;
-				max-height: 550px;
-				overflow-y: auto;
-				overflow-x: hidden;
-			}
 			.underline {
 				text-decoration: underline;
+			}
+			thead, tbody tr {
+				display:table;
+				width:100%;
+				table-layout:fixed;/* even columns width , fix width of table too*/
+			}
+			tbody {
+				display:block;
+				max-height:550px;
+				overflow-y:scroll;
+			}
+			thead {
+				width: calc( 100% - 1em )/* scrollbar is average 1em/16px width, remove it from thead width */
 			}
 		</style>
 	</head>
@@ -81,7 +87,7 @@
 							<table class="ui selectable striped celled structured table">
 								<thead>
 									<tr class="center aligned">
-										<th class="one wide">ID</th>
+										<th class="three wide">ID</th>
 										<th>Production</th>
 									</tr>
 								</thead>
@@ -102,18 +108,16 @@
 							<div class="ui inverted dimmer">
 								<div class="ui text loader errorMsg"></div>
 							</div>
-							<div class="parserMaxh">
-								<table class="ui selectable striped celled structured table">
-									<thead>
-										<tr id="pth1" class="center aligned">
-										</tr>
-										<tr id="pth2" class="center aligned">
-										</tr>
-									</thead>
-									<tbody id="ptb">
-									</tbody>
-								</table>
-							</div>
+							<table class="ui selectable striped celled structured table">
+								<thead>
+									<tr id="pth1" class="center aligned">
+									</tr>
+									<tr id="pth2" class="center aligned">
+									</tr>
+								</thead>
+								<tbody id="ptb">
+								</tbody>
+							</table>
 						</div>
 					</div>
 
@@ -127,21 +131,19 @@
 								<div class="ui inverted dimmer">
 									<div class="ui text loader errorMsg"></div>
 								</div>
-								<div class="parserMaxh">
-									<table class="ui stackable striped selectable celled table">
-										<thead>
-											<tr class="center aligned">
-												<th class="one wide">Step</th>
-												<th>statusStack</th>
-												<th>parseStack</th>
-												<th>inStrStack</th>
-												<th>action</th>
-											</tr>
-										</thead>
-										<tbody id="parser">
-										</tbody>
-									</table>
-								</div>
+								<table class="ui stackable striped selectable celled table">
+									<thead>
+										<tr class="center aligned">
+											<th class="one wide">Step</th>
+											<th>statusStack</th>
+											<th>parseStack</th>
+											<th>inStrStack</th>
+											<th>action</th>
+										</tr>
+									</thead>
+									<tbody id="parser">
+									</tbody>
+								</table>
 							</div>
 						</div>
 
@@ -150,19 +152,13 @@
 			</div>
 		</div>
 		<script src="../node_modules/semantic-ui-css/semantic.min.js"></script>
-		<script src="../node_modules/mermaid/dist/mermaid.min.js"></script>
 		<script src="../node_modules/file-saver/FileSaver.min.js"></script>
+		<script src="../node_modules/viz.js/viz.js"></script>
 		<script>
-			mermaid.initialize({
-				startOnLoad:false,
-				flowchart:{
-					useMaxWidth:false,
-					htmlLabels:true
-				}
-			});
 
-			function update() {
+			function update(local) {
 				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
+				console.log(local);
 				$.ajax({
 					url: "LR.php",
 					datatype: "json",
@@ -170,53 +166,51 @@
 					data: {"data": data},
 					success: function(res, status, jqxhr) {
 						$('.ui.dimmer').dimmer('hide');
-						console.log(res);
+						// console.log(res);
 						// DFA Graph
-						var graphAll = mermaidAPI.render(res['Graph']['All']);
-						$('#GraphAll').html(graphAll);
+						if(!local) {
+							var GraphAll = Viz(res['Graph']['All'], {format: "svg"});
+							var GraphSimple = Viz(res['Graph']['Simple'], {format: "svg"});
+							$('#GraphAll').html(GraphAll);
+							$('#Graph').html(GraphSimple);
+							// Gammar list
+							var gmrb = '';
+							for(var i=0, len=res["Grammar"].length; i<len; ++i)
+								gmrb += '<tr class="center aligned">' +
+									'<td class="three wide">' + i + '</td>' +
+									'<td>' + res["Grammar"][i] + '</td>';
+							$('#gmrb').html(gmrb);
 
-						$('#Graph').html(res['Graph']['Simple']);
-						mermaid.init({noteMargin: 0}, "#Graph");
-						$('#Graph').removeAttr('data-processed');
+							// parse Table
+							var pth1 = '<th rowspan="2">Status</th>'+
+								'<th colspan='+ res["parseTable"]["Vt"].length +'>ACTION</th>' +
+								'<th colspan='+ res["parseTable"]["Vn"].length +'>GOTO</th>';
+							var pth2 = '';
+							var ptb = '';
+							for(var i=0, len=res["parseTable"]["Vt"].length; i<len; ++i)
+								pth2 += '<th>' + res["parseTable"]["Vt"][i] + '</th>'
+									for(var i=0, len=res["parseTable"]["Vn"].length; i<len; ++i)
+										pth2 += '<th>' + res["parseTable"]["Vn"][i] + '</th>';
 
-						// Gammar list
-						var gmrb = '';
-						for(var i=0, len=res["Grammar"].length; i<len; ++i)
-							gmrb += '<tr class="center aligned">' +
-								'<td>' + i + '</td>' +
-								'<td>' + res["Grammar"][i] + '</td>';
-
-						$('#gmrb').html(gmrb);
-
-						// parse Table
-						var pth1 = '<th rowspan="2" class="one wide">Status</th>'+
-							'<th colspan='+ res["parseTable"]["Vt"].length +'>ACTION</th>' +
-							'<th colspan='+ res["parseTable"]["Vn"].length +'>GOTO</th>';
-						var pth2 = '';
-						var ptb = '';
-						for(var i=0, len=res["parseTable"]["Vt"].length; i<len; ++i)
-							pth2 += '<th>' + res["parseTable"]["Vt"][i] + '</th>'
-						for(var i=0, len=res["parseTable"]["Vn"].length; i<len; ++i)
-							pth2 += '<th>' + res["parseTable"]["Vn"][i] + '</th>';
-
-						for(var i=0, len=res["parseTable"]["Body"].length; i<len; ++i) {
-							ptb += '<tr class="center aligned"><td>' + i + '</td>'
-							var row = res["parseTable"]["Body"][i];
+							for(var i=0, len=res["parseTable"]["Body"].length; i<len; ++i) {
+								ptb += '<tr class="center aligned"><td>' + i + '</td>'
+									var row = res["parseTable"]["Body"][i];
 								for(var j=0, jlen=row.length; j<jlen; ++j)
 									ptb += '<td>' + row[j] + '</td>'
 										ptb += '</tr>';
-						}
+							}
 
-						$('#pth1').html(pth1);
-						$('#pth2').html(pth2);
-						$('#ptb').html(ptb);
+							$('#pth1').html(pth1);
+							$('#pth2').html(pth2);
+							$('#ptb').html(ptb);
+						}
 
 						// parser
 						var parser = '';
 						for(var i=0, len=res["parser"].length; i<len; ++i) {
 							var row = res["parser"][i];
 							parser += '<tr class="center aligned '+ (row["action"] == "ERROR"?"negative":"") +'">' +
-								'<td>'+ i +'</td>' +
+								'<td class="one wide">'+ i +'</td>' +
 								'<td>'+ row["statusStack"] +'</td>' +
 								'<td>'+ row["parseStack"] +'</td>' +
 								'<td>'+ row["inStrStack"] +'</td>' +
@@ -232,8 +226,12 @@
 				});
 			}
 
-			$("#indata").on("keyup paste", update);
-			$("#grammar").on("keyup paste", update);
+			$("#indata").on("keyup paste", function() {
+				update(true);
+			});
+			$("#grammar").on("keyup paste", function() {
+				update(false);
+			});
 			$('#graphButton').click(function() {
 				var gw = window.open("", "DFA Graph", "width=800,height=600,scrollbars=1");
 				gw.document.write($('#GraphAll').html());
@@ -254,7 +252,7 @@
 						"F->(E)\n"+
 						"F->i"
 						);
-				update();
+				update(false);
 			});
 		</script>
 	</body>
