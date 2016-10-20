@@ -35,9 +35,20 @@
 				<h4 class="ui horizontal divider header">
 					DFA Graph
 				</h4>
-				<button class="huge ui button fluid" id="graphButton">
-					Open DFA Graph on new window
-				</button>
+				<div class="ui inverted dimmer">
+					<div class="ui text loader errorMsg"></div>
+				</div>
+				<div class="huge ui buttons fluid">
+					<button class="ui button" id="graphButton">
+						Open DFA Graph on new window
+					</button>
+					<div class="or"></div>
+					<button class="ui positive button" id="graphDownload">
+						Download DFA Graph
+					</button>
+				</div>
+				<div id="GraphAll" style="display:none">
+				</div>
 				<div id="Graph">
 				</div>
 			</div>
@@ -55,15 +66,18 @@
 								<label for="grammar">输入文法</label>
 								<textarea id="grammar"></textarea>
 							</div>
-							<!-- <button class="small fluid ui submit button" type="submit" id="submit">LL1分析！</button> -->
 						</div>
 					</div>
 
+					<!-- 文法列表 -->
 					<div class="row">
 						<div class="ui piled segment">
 							<h4 class="ui horizontal divider header">
 								Grammar List
 							</h4>
+							<div class="ui inverted dimmer">
+								<div class="ui text loader errorMsg"></div>
+							</div>
 							<table class="ui selectable striped celled structured table">
 								<thead>
 									<tr class="center aligned">
@@ -85,6 +99,9 @@
 							<h4 class="ui horizontal divider header">
 								Parse Table
 							</h4>
+							<div class="ui inverted dimmer">
+								<div class="ui text loader errorMsg"></div>
+							</div>
 							<div class="parserMaxh">
 								<table class="ui selectable striped celled structured table">
 									<thead>
@@ -107,6 +124,9 @@
 								<h4 class="ui horizontal divider header">
 									Parser
 								</h4>
+								<div class="ui inverted dimmer">
+									<div class="ui text loader errorMsg"></div>
+								</div>
 								<div class="parserMaxh">
 									<table class="ui stackable striped selectable celled table">
 										<thead>
@@ -131,9 +151,10 @@
 		</div>
 		<script src="../node_modules/semantic-ui-css/semantic.min.js"></script>
 		<script src="../node_modules/mermaid/dist/mermaid.min.js"></script>
+		<script src="../node_modules/file-saver/FileSaver.min.js"></script>
 		<script>
 			mermaid.initialize({
-				startOnLoad:true,
+				startOnLoad:false,
 				flowchart:{
 					useMaxWidth:false,
 					htmlLabels:true
@@ -142,17 +163,21 @@
 
 			function update() {
 				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
-				console.log(data);
 				$.ajax({
 					url: "LR.php",
 					datatype: "json",
 					method: "POST",
 					data: {"data": data},
 					success: function(res, status, jqxhr) {
+						$('.ui.dimmer').dimmer('hide');
 						console.log(res);
 						// DFA Graph
-						var graph = mermaidAPI.render(res['Graph']);
-						$('#Graph').html(graph);
+						var graphAll = mermaidAPI.render(res['Graph']['All']);
+						$('#GraphAll').html(graphAll);
+
+						$('#Graph').html(res['Graph']['Simple']);
+						mermaid.init({noteMargin: 0}, "#Graph");
+						$('#Graph').removeAttr('data-processed');
 
 						// Gammar list
 						var gmrb = '';
@@ -199,6 +224,10 @@
 								'</tr>';
 						}
 						$('#parser').html(parser);
+					},
+					error: function() {
+						$('.errorMsg').html('请检查文法是否合法，否则请联系我！谢谢合作。');
+						$('.ui.dimmer').dimmer('show');
 					}
 				});
 			}
@@ -207,7 +236,12 @@
 			$("#grammar").on("keyup paste", update);
 			$('#graphButton').click(function() {
 				var gw = window.open("", "DFA Graph", "width=800,height=600,scrollbars=1");
-				gw.document.write($('#Graph').html());
+				gw.document.write($('#GraphAll').html());
+				// console.log($('#graphButton').val());
+			});
+			$('#graphDownload').click(function() {
+				var blob = new Blob([$('#GraphAll').html()], {type: "text/plain;charset=utf-8"});
+				saveAs(blob, "LR1_DFA_Graph.svg");
 			});
 
 			$(document).ready(function() {

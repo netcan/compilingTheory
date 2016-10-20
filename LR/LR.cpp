@@ -437,20 +437,21 @@ string Prod::replaceAll(const string &in, const string from, const string to) {
 }
 
 void LR::drawGraph() {
-	printf("\"Graph\": \"");
-	printf("graph BT;");
+	printf("\"Graph\": {");
+	// 图的全部信息
+	printf("\"All\": \"");
+	printf("graph TD;");
 	// 画节点
 	for(const auto &I: C) { // 列出项目集
 		int i = &I-&C[0];
-		printf("I%d(\\\"I%d <br>", i, i);
+		printf("I%d(\\\"<div>I(%d)</div> ", i, i);
 		for(const auto &p: I.prods) { // 列出项目
+			printf("<div>");
 			string res = p.displayStr();
-			res = Prod::replaceAll(res, "(", "#40;");
-			res = Prod::replaceAll(res, "(", "#41;");
 			if(res.find('^') != string::npos)
 				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
 
-			printf("%s <br>", res.c_str());
+			printf("%s </div>", res.c_str());
 		}
 		printf("\\\");");
 	}
@@ -459,13 +460,39 @@ void LR::drawGraph() {
 	for(const auto &link: GOTO) {
 		int i = link.first.first;
 		string X = string(1, link.first.second);
-		X = Prod::replaceAll(X, "(", "#40;");
-		X = Prod::replaceAll(X, ")", "#41;");
-
 		int j = link.second;
 		printf("I%d-->|\\\"%s\\\"|I%d;", i, X.c_str(), j);
 	}
-	printf("\"");
+	printf("\", \n");
+
+	// 图的简要信息
+	printf("\"Simple\": \"");
+	printf("graph TD;");
+	// 画节点
+	for(size_t i=0; i<C.size(); ++i)
+		printf("I%ld((\\\"I(%ld)\\\"));", i, i);
+	// 画边
+	for(const auto &link: GOTO) {
+		int i = link.first.first;
+		string X = string(1, link.first.second);
+		int j = link.second;
+		printf("I%d-->|\\\"%s\\\"|I%d;", i, X.c_str(), j);
+	}
+	// 附加信息
+	for(const auto &I: C) { // 列出项目集
+		int i = &I-&C[0];
+		printf("click I%d undefined \\\"", i);
+		for(const auto &p: I.prods) { // 列出项目
+			string res = p.displayStr();
+			if(res.find('^') != string::npos)
+				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
+
+			printf("<div>%s </div>", res.c_str());
+		}
+		printf("\\\";");
+	}
+
+	printf("\"}");
 }
 
 void LR::run() {
