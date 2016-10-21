@@ -26,8 +26,8 @@
 						神兽保佑，代码无BUG!
  ************************************************************************/
 
-#ifndef LR_H
-#define LR_H
+#ifndef _LR_H
+#define _LR_H
 
 #include <iostream>
 #include <ctype.h>
@@ -91,10 +91,6 @@ class Item { // 项目集
 		void display() const;
 };
 
-set<char>Item::Vn; // 全局静态变量
-set<char>Item::Vt;
-set<char>Item::Symbol;
-
 class LR {
 	private:
 		Item G; // 文法G
@@ -130,12 +126,8 @@ class LR {
 		void parser(); // LR(1)分析
 		void showGrammar(); // 显示输入的文法产生式
 		void drawGraph(); // 画出DFA！
+		void generateDot();
 		void run();
 };
 
-const char*LR::actionStatStr[] = {
-	"acc",
-	"s",
-	"r"
-};
 #endif

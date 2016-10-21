@@ -27,6 +27,14 @@
  ************************************************************************/
 
 #include "LR.h"
+set<char>Item::Vn; // 全局静态变量
+set<char>Item::Vt;
+set<char>Item::Symbol;
+const char*LR::actionStatStr[] = {
+	"acc",
+	"s",
+	"r"
+};
 
 string Prod::displayStr() const{
 	string p = string(1, noTerminal) + "->" + right.c_str();
@@ -531,6 +539,40 @@ void LR::drawGraph() {
 
 }
 
+void LR::generateDot() {
+	printf("digraph all{\n"
+			"node [shape=box style=filled];\n"
+		  );
+	// 文法信息
+	printf("Grammar[style=rounded label=\"Grammar\n");
+	for(const auto &prod: G.prods)
+		printf("%s\n", prod.displayStr().c_str());
+	printf("\" ];\n");
+
+	// 画节点
+	for(const auto &I: C) { // 遍历项目集
+		int i = &I - &C[0];
+		printf("I%d[label=\"I%d\n", i, i);
+		for(const auto &p: I.prods) { // 列出项目
+			string res = p.displayStr();
+			if(res.find('^') != string::npos)
+				res = Prod::replaceAll(res, "^", string(1, G.prods[0].noTerminal)+"'");
+			printf("%s\n", res.c_str());
+		}
+		printf("\" ];\n");
+	}
+
+	// 画边
+	for(const auto &link: GOTO) {
+		int i = link.first.first;
+		string X = string(1, link.first.second);
+		int j = link.second;
+		printf("I%d -> I%d[label=\"%s\"];\n", i, j, X.c_str());
+	}
+	printf("Grammar -> I0[style=invis];");
+	printf("\n}\n");
+}
+
 void LR::run() {
 	string in;
 	while(cin >> in && in != "#")
@@ -555,11 +597,13 @@ void LR::run() {
 	printf("}\n");
 }
 
+#ifndef _GENERATE_DOT_
 int main() {
 	LR lr;
 	lr.run();
 
 	return 0;
 }
+#endif
 
 
