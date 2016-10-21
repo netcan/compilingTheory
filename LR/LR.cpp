@@ -465,6 +465,12 @@ void LR::drawGraph() {
 	printf("digraph all{"
 			"node [shape=box style=filled];"
 		  );
+	// 文法信息
+	printf("Grammar[style=rounded label=\\\"Grammar\\n");
+	for(const auto &prod: G.prods)
+		printf("%s\\n", prod.displayStr().c_str());
+	printf("\\\" ];\\n");
+
 	// 画节点
 	for(const auto &I: C) { // 遍历项目集
 		int i = &I - &C[0];
@@ -485,12 +491,20 @@ void LR::drawGraph() {
 		int j = link.second;
 		printf("I%d -> I%d[label=\\\"%s\\\"];", i, j, X.c_str());
 	}
+	printf("Grammar -> I0[style=invis];");
 	printf("}\"\n, ");
+
 	// 图的简要信息
 	printf("\"Simple\": \"");
 	printf("digraph simple {"
 			"node [shape = circle style=filled];"
 		  );
+	// 文法信息
+	printf("Grammar[shape=box style=rounded label=\\\"Grammar\\n");
+	for(const auto &prod: G.prods)
+		printf("%s\\n", prod.displayStr().c_str());
+	printf("\\\" ];\\n");
+
 	// 画节点
 	for(const auto &I: C) { // 遍历项目集
 		int i = &I - &C[0];
@@ -510,6 +524,7 @@ void LR::drawGraph() {
 		int j = link.second;
 		printf("I%d -> I%d[label=\\\"%s\\\"];", i, j, X.c_str());
 	}
+	printf("Grammar -> I0[style=invis];");
 
 	printf("}\"");
 	printf("}");
