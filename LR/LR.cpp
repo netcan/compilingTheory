@@ -159,46 +159,58 @@ void LR::parser() {
 
 Item LR::closure(Item I) {
 	if(I.prods.size() == 0) return I;
-	unsigned int size = 0;
-	while(size != I.prods.size()) { // 当没有项目加入的时候
-		size = I.prods.size();
-		for(auto &prod: I.prods) { // 枚举I的产生式
-			unsigned long pointLoc = 0;
-			if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
-				char X = prod.right[pointLoc + 1];
-				if(G.Vt.find(X) != G.Vt.end()) {
-					if(X == '@')
-						swap(prod.right[pointLoc], prod.right[pointLoc + 1]);
-					continue;
-				}
+	// size_t size = 0;
+	// while(size != I.prods.size()) { // 当没有项目加入的时候
+		// size = I.prods.size();
+		// for(auto &prod: I.prods) { // bug
+	for(size_t i = 0; i < I.prods.size(); ++i) { // 枚举I的产生式
+		// puts("======================");
+		// printf("i=%ld, size:%ld\n", i, I.prods.size());
+		// I.display();
+		Prod prod = I.prods[i];
+		unsigned long pointLoc = 0;
+		// printf("prod: %s\n", prod.displayStr().c_str());
+		if((pointLoc = prod.right.find('.')) != string::npos && pointLoc != prod.right.length() - 1) { // 找到.，A->a.Bc,d
+			char X = prod.right[pointLoc + 1];
+			if(G.Vt.find(X) != G.Vt.end()) { // 终结符
+				if(X == '@') // @特殊处理
+					swap(I.prods[i].right[pointLoc], I.prods[i].right[pointLoc + 1]);
+				continue;
+			}
 
-				string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
-				// prod.display();
-				// printf("f: %s\n", f.c_str());
-				set<char> ff;
-				for(const auto& c: prod.additionalVt) {
-					set<char> fs = first(f + c);
-					ff.insert(fs.begin(), fs.end());
-				}
-				// if(ff == set<char>{'#'} && prod.noTerminal != EXTENSION_NOTERMINAL)  // 只含#，那么把Follow集加进来
-					// ff.insert(FOLLOW[prod.noTerminal].begin(), FOLLOW[prod.noTerminal].end());
+			string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
+			// prod.display();
+			// printf("f: %s\n", f.c_str());
+			set<char> ff;
+			for(const auto& c: prod.additionalVt) {
+				set<char> fs = first(f + c);
+				ff.insert(fs.begin(), fs.end());
+			}
+			// if(ff == set<char>{'#'} && prod.noTerminal != EXTENSION_NOTERMINAL)  // 只含#，那么把Follow集加进来
+			// ff.insert(FOLLOW[prod.noTerminal].begin(), FOLLOW[prod.noTerminal].end());
 
-				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it) {
-					if(*it == X) { // 找到产生式
-						Prod p = *it;
+
+			for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it) {
+				if(*it == X) { // 找到产生式
+					Prod p = *it;
+					if(p.right[0] == '@') { // 特殊处理.@ => @.
 						p.right = '.' + p.right;
-						vector<Prod>::iterator Iit = find(I.prods.begin(), I.prods.end(), p); // 找I中是否存在产生式
-						if(Iit != I.prods.end())  // 找到
-							Iit->additionalVt.insert(ff.begin(), ff.end());
-						else {
-							p.additionalVt.insert(ff.begin(), ff.end());
-							I.prods.push_back(p);
-						}
+						swap(p.right[0], p.right[1]);
+					} else
+						p.right = '.' + p.right;
+
+					vector<Prod>::iterator Iit = find(I.prods.begin(), I.prods.end(), p); // 找I中是否存在产生式
+					if(Iit != I.prods.end())  // 找到
+						Iit->additionalVt.insert(ff.begin(), ff.end());
+					else {
+						p.additionalVt.insert(ff.begin(), ff.end());
+						I.prods.push_back(p);
 					}
 				}
 			}
 		}
 	}
+	// }
 	return I;
 }
 
@@ -347,6 +359,15 @@ set<char> LR::first(const string &s) { // s不为产生式！
 			else {
 				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it)
 					if(it->noTerminal == s[0]) {
+						// 防止直接左递归
+						size_t xPos = it->right.find(it->noTerminal);
+						if(xPos != string::npos) { // 找到X->aXb
+							if(xPos == 0) continue; // X->Xb
+							else { // X->aXb
+								string a = Prod::cut(it->right, 0, xPos - 1);
+								if(first(a) == set<char>{'@'}) continue;
+							}
+						}
 						set<char> f = first(it->right);
 						FIRST[s[0]].insert(f.begin(), f.end());
 					}
