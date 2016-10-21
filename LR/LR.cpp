@@ -522,8 +522,8 @@ void LR::run() {
 		add(in);
 	in = "";
 	cin >> in;
+	if(in == "#" || in.size() == 0) return;
 	loadStr(in);
-
 
 	printf("{");
 	showGrammar();

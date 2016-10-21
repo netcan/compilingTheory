@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$data = $_POST['data'] . '##';
+$data = $_POST['data'] . "\n#\n#";
 $descriptorspec = array(
    0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
    1 => array("pipe", "w"),  // stdout is a pipe that the child will write to

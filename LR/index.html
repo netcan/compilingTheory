@@ -167,12 +167,7 @@
 					success: function(res, status, jqxhr) {
 						$('.ui.dimmer').dimmer('hide');
 						// console.log(res);
-						// DFA Graph
 						if(!local) {
-							var GraphAll = Viz(res['Graph']['All'], {format: "svg"});
-							var GraphSimple = Viz(res['Graph']['Simple'], {format: "svg"});
-							$('#GraphAll').html(GraphAll);
-							$('#Graph').html(GraphSimple);
 							// Gammar list
 							var gmrb = '';
 							for(var i=0, len=res["Grammar"].length; i<len; ++i)
@@ -218,6 +213,14 @@
 								'</tr>';
 						}
 						$('#parser').html(parser);
+
+						if(!local) {
+							// DFA Graph
+							var GraphAll = Viz(res['Graph']['All'], {format: "svg"});
+							var GraphSimple = Viz(res['Graph']['Simple'], {format: "svg"});
+							$('#GraphAll').html(GraphAll);
+							$('#Graph').html(GraphSimple);
+						}
 					},
 					error: function() {
 						$('.errorMsg').html('请检查文法是否合法，否则请联系我！谢谢合作。');

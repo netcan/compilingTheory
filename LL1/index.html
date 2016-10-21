@@ -168,7 +168,7 @@
 				}
 			}
 
-			function update() {
+			function update(local) {
 				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
 				//	console.log(data);
 				$.ajax({
@@ -178,40 +178,43 @@
 					data: {"data": data},
 					success: function(res, status, jqxhr) {
 						// console.log(res);
-						// first and follow
+						console.log(local);
 						$('.ui.dimmer').dimmer('hide');
-						var ff = '';
-						for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
-							var first = res['FIRST'][i];
-							var follow = res['FOLLOW'][i];
-							ff += '<tr class="center aligned"><td>' + first['noTerminal'] +'</td><td>{';
-								for(var j = 0, jlen = first['Terminal'].length; j < jlen; ++j)
-									ff += (j==0?" ":", ") + first['Terminal'][j];
-							ff += '}</td><td>{';
-							for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
-								ff += (j==0?" ":", ") + follow['Terminal'][j];
-							ff += ' }</td></tr>'
+						if(!local) {
+							// first and follow
+							var ff = '';
+							for(var i = 0, len = res['FIRST'].length; i<len; ++i) {
+								var first = res['FIRST'][i];
+								var follow = res['FOLLOW'][i];
+								ff += '<tr class="center aligned"><td>' + first['noTerminal'] +'</td><td>{';
+									for(var j = 0, jlen = first['Terminal'].length; j < jlen; ++j)
+										ff += (j==0?" ":", ") + first['Terminal'][j];
+									ff += '}</td><td>{';
+										for(var j = 0, jlen = follow['Terminal'].length; j < jlen; ++j)
+											ff += (j==0?" ":", ") + follow['Terminal'][j];
+										ff += ' }</td></tr>'
 
+							}
+							$('#ff').html(ff);
+
+							// parse table
+							var pth = '<th></th>';
+							var table = res['Table'];
+							for(var i=0, len = table['Header'].length; i < len; ++i)
+								pth += '<th>'+ table['Header'][i] +'</th>';
+							var ptb = '';
+							for(var i=0, len = table['Body'].length; i < len; ++i) {
+								var row = table['Body'][i];
+								ptb += '<tr><td>' + row['noTerminal'] + '</td>';
+								for(var j=0, jlen = row['production'].length; j < jlen; ++j)
+									ptb += '<td>' + row['production'][j] + '</td>';
+								ptb += '</tr>'
+							}
+
+							// console.log(ptb);
+							$('#pth').html(pth);
+							$('#ptb').html(ptb);
 						}
-						$('#ff').html(ff);
-
-						// parse table
-						var pth = '<th></th>';
-						var table = res['Table'];
-						for(var i=0, len = table['Header'].length; i < len; ++i)
-							pth += '<th>'+ table['Header'][i] +'</th>';
-						var ptb = '';
-						for(var i=0, len = table['Body'].length; i < len; ++i) {
-							var row = table['Body'][i];
-							ptb += '<tr><td>' + row['noTerminal'] + '</td>';
-							for(var j=0, jlen = row['production'].length; j < jlen; ++j)
-								ptb += '<td>' + row['production'][j] + '</td>';
-							ptb += '</tr>'
-						}
-
-						// console.log(ptb);
-						$('#pth').html(pth);
-						$('#ptb').html(ptb);
 
 						// parser
 						var parser = '';
@@ -225,8 +228,9 @@
 						for(var i=0, len = res['Parser'].length; i < len; ++i) {
 							var row = res['Parser'][i];
 							var production = res['Parser'][(i+1) % len]['production'];
-							if(! isMatch.test(production) && production.length != 0 && production != "ERROR")
-								ParserTree(parserTree['nodeStructure'], production);
+
+								if(! isMatch.test(production) && production.length != 0 && production != "ERROR")
+									ParserTree(parserTree['nodeStructure'], production);
 
 							parser += '<tr class="' + (row['parseStack'] == "ERROR"?"negative":"") + '"><td>' + i + '</td><td>' + row['parseStack'] + '</td>' +
 								'<td>' + row['indataStack'] + '</td>' +
@@ -253,8 +257,12 @@
 			   update();
 			   });
 			*/
-			$("#indata").on("keyup paste", update);
-			$("#grammar").on("keyup paste", update);
+			$("#indata").on("keyup paste", function() {
+				update(true);
+			});
+			$("#grammar").on("keyup paste", function() {
+				update(false);
+			});
 
 			$(document).ready(function() {
 				$('#indata').val('i*i+i*(i+i)*i-i+i/(i*i)*i');
@@ -268,7 +276,7 @@
 						"F->(E)\n" +
 						"F->i"
 						);
-				update();
+				update(false);
 			});
 		</script>
 

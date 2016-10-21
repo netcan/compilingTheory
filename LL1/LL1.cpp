@@ -335,10 +335,12 @@ void LL1::run() {
 	string in;
 	while(cin >> in && in != "#") // 读取文法
 		addProd(Prod(in));
-	build();
 	in = "";
 	cin >> in; // 表达式
+	if(in == "#" || in.size() == 0) return;
 	loadIndata(in);
+
+	build();
 	parser();
 	puts("}");
 }
