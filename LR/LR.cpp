@@ -485,7 +485,7 @@ void LR::drawGraph() {
 		int j = link.second;
 		printf("I%d -> I%d[label=\\\"%s\\\"];", i, j, X.c_str());
 	}
-	printf("}\", ");
+	printf("}\"\n, ");
 	// 图的简要信息
 	printf("\"Simple\": \"");
 	printf("digraph simple {"
