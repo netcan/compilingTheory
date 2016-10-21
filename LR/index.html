@@ -37,7 +37,7 @@
 			<h1 class="header">LR(1) parser by netcan</h1>
 
 			<!-- DFA图 -->
-			<div class="ui stacked segment">
+			<div class="ui stacked segment" id="DFA">
 				<h4 class="ui horizontal divider header">
 					DFA Graph
 				</h4>
@@ -64,6 +64,11 @@
 				<div class="four wide column">
 					<div class="ui stacked segment">
 						<div class="ui form">
+							<div class="field">
+								<label for="selectGrammar">测试文法</label>
+								<select class="ui dropdown fluid" id="selectGrammar">
+								</select>
+							</div>
 							<div class="field">
 								<label for="indata">输入串</label>
 								<input type="text" id="indata">
@@ -158,7 +163,6 @@
 
 			function update(local) {
 				var data = $('#grammar').val() + '\n#\n' + $('#indata').val();
-				console.log(local);
 				$.ajax({
 					url: "LR.php",
 					datatype: "json",
@@ -166,7 +170,7 @@
 					data: {"data": data},
 					success: function(res, status, jqxhr) {
 						$('.ui.dimmer').dimmer('hide');
-						// console.log(res);
+						console.log(res);
 						if(!local) {
 							// Gammar list
 							var gmrb = '';
@@ -220,6 +224,7 @@
 							var GraphSimple = Viz(res['Graph']['Simple'], {format: "svg"});
 							$('#GraphAll').html(GraphAll);
 							$('#Graph').html(GraphSimple);
+							window.scrollTo(0, $('#DFA').height() + 35);
 						}
 					},
 					error: function() {
@@ -246,18 +251,51 @@
 			});
 
 			$(document).ready(function() {
-				$('#indata').val('i*i+i*(i+i)*i-i+i/(i*i)*i');
-				$('#grammar').val(
-						"E->TG\n" +
-						"G->+TG|-TG\n" +
-						"G->@\n" +
-						"T->FS\n" +
-						"S->*FS|/FS\n" +
-						"S->@\n" +
-						"F->(E)\n" +
-						"F->i"
-						);
-				update(false);
+				var inStr = ["i*i+i*(i+i)*i-i+i/(i*i)*i",
+				"i+i*i",
+				"a*(a+a*a)",
+				"aaaabbbbaaaabbbb"
+				];
+				var grammar = ["E->TG\n" +
+					"G->+TG|-TG\n" +
+					"G->@\n" +
+					"T->FS\n" +
+					"S->*FS|/FS\n" +
+					"S->@\n" +
+					"F->(E)\n" +
+					"F->i",
+
+					"E->E+T\n" +
+					"E->T\n" +
+					"T->T*F\n" +
+					"T->F\n"+
+					"F->(E)\n" +
+					"F->i",
+
+					"E->E+E|E*E|(E)|a",
+
+					"S->aBS|bAS|@\n" +
+					"A->bAA|a\n" +
+					"B->aBB|b\n"
+				];
+
+				var opt = '';
+				for(var i=0, len=grammar.length; i<len; ++i)
+					opt += "<option value="+i+">" + "文法" + i + "</option>";
+				$('#selectGrammar').html(opt);
+				{ // 初始化文法
+					 $('#selectGrammar').val(0);
+					 $('#indata').val(inStr[$('#selectGrammar').val()]);
+					 $('#grammar').val(grammar[$('#selectGrammar').val()]);
+					 update(false);
+				}
+
+				$('#selectGrammar').dropdown({allowReselection: true});
+				$('#selectGrammar').on('change', function() {
+					$('#indata').val(inStr[$('#selectGrammar').val()]);
+					$('#grammar').val(grammar[$('#selectGrammar').val()]);
+					update(false);
+				});
 			});
 		</script>
 	</body>
