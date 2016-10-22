@@ -189,11 +189,13 @@ Item LR::closure(Item I) {
 			string f = Prod::cut(prod.right, pointLoc+2, prod.right.length());
 			// prod.display();
 			// printf("f: %s\n", f.c_str());
-			set<char> ff;
+			// printf("====================");
+			set<char> ff = {};
 			for(const auto& c: prod.additionalVt) {
 				set<char> fs = first(f + c);
 				ff.insert(fs.begin(), fs.end());
 			}
+
 			// if(ff == set<char>{'#'} && prod.noTerminal != EXTENSION_NOTERMINAL)  // 只含#，那么把Follow集加进来
 			// ff.insert(FOLLOW[prod.noTerminal].begin(), FOLLOW[prod.noTerminal].end());
 
@@ -366,19 +368,25 @@ set<char> LR::first(const string &s) { // s不为产生式！
 			if(FIRST[s[0]].size() != 0) return FIRST[s[0]];
 			else {
 				for(vector<Prod>::iterator it = G.prods.begin(); it != G.prods.end(); ++it)
-					if(it->noTerminal == s[0]) {
+					if(*it == s[0]) {
 						// 防止直接左递归
 						size_t xPos = it->right.find(it->noTerminal);
+						// printf("prod: %s right: %s\n", it->displayStr().c_str(), it->right.c_str());
 						if(xPos != string::npos) { // 找到X->aXb
 							if(xPos == 0) continue; // X->Xb
 							else { // X->aXb
-								string a = Prod::cut(it->right, 0, xPos - 1);
+								string a = Prod::cut(it->right, 0, xPos);
 								if(first(a) == set<char>{'@'}) continue;
 							}
 						}
 						set<char> f = first(it->right);
 						FIRST[s[0]].insert(f.begin(), f.end());
 					}
+				// printf("first(%s) = ", s.c_str());
+				// for(auto c: FIRST[s[0]])
+					// printf("%c, ", c);
+				// puts("");
+
 				return FIRST[s[0]];
 			}
 	} else { // first(X1X2X3X4)...
@@ -425,6 +433,10 @@ void LR::follow() {
 }
 
 void LR::debug() {
+	string in;
+	while(cin >> in && in != "#")
+		add(in);
+
 	puts("=====Proj:======");
 	for(auto pro: G.prods)
 		printf("%s\n", (string(1, pro.noTerminal) + "->" + pro.right).c_str());
@@ -446,7 +458,12 @@ void LR::debug() {
 	// for(auto prod: I.prods)
 		// prod.display();
 	build();
-	showTable();
+	showGrammar();
+
+	in = "";
+	cin >> in;
+	if(in == "#" || in.size() == 0) return;
+	loadStr(in);
 	parser();
 	puts("");
 }
@@ -578,9 +595,6 @@ void LR::run() {
 	while(cin >> in && in != "#")
 		add(in);
 	in = "";
-	cin >> in;
-	if(in == "#" || in.size() == 0) return;
-	loadStr(in);
 
 	printf("{");
 	showGrammar();
@@ -593,6 +607,9 @@ void LR::run() {
 	drawGraph();
 	printf(",\n");
 
+	cin >> in;
+	if(in == "#" || in.size() == 0) return;
+	loadStr(in);
 	parser();
 	printf("}\n");
 }
